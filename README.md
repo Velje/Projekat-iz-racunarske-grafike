@@ -122,11 +122,11 @@ For a basic app setup, you need to:
 4. Compile and run the program.
 
 ```cpp
-#include <engine/Engne.hpp>
+#include <engine/Engine.hpp>
 class MyApp : public engine::core::App {
 
 public:
-  void setup() override;
+  void app_setup() override;
 };
 
 void MyApp::app_setup() {
@@ -225,8 +225,8 @@ The `resources/models/` directory stores all the models. Let's add a backpack mo
 
 ```cpp
     Model* backpack = engine::core::Controller::get<engine::resources::ResourcesController>()->model("backpack");
-    Shader* shader   = ... 
-    backpack->draw(shader);
+Shader* shader   = ...
+backpack->draw(shader);
 ```
 
 ### How to add a texture?
@@ -284,17 +284,17 @@ Here is an example of displaying camera info in a GUI.
 
 ```cpp
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
-    graphics->begin_gui();
-    // Draw Camera Info window
-    {
-        ImGui::Begin("Camera info");
-        const auto &c = *camera;
-        ImGui::Text("Camera position: (%f, %f, %f)", c.Position.x, c.Position.y, c.Position.z);
-        ImGui::Text("(Yaw, Pitch): (%f, %f)", c.Yaw, c.Pitch);
-        ImGui::Text("Camera front: (%f, %f, %f)", c.Front.x, c.Front.y, c.Front.z);
-        ImGui::End();
-    }
-    graphics->end_gui();
+graphics->begin_gui();
+// Draw Camera Info window
+{
+ImGui::Begin("Camera info");
+const auto &c = *camera;
+ImGui::Text("Camera position: (%f, %f, %f)", c.Position.x, c.Position.y, c.Position.z);
+ImGui::Text("(Yaw, Pitch): (%f, %f)", c.Yaw, c.Pitch);
+ImGui::Text("Camera front: (%f, %f, %f)", c.Front.x, c.Front.y, c.Front.z);
+ImGui::End();
+}
+graphics->end_gui();
 ```
 
 ![img.png](extra/img.png)
@@ -378,9 +378,9 @@ the `key` on which the event occurred as an argument.
 
 ```cpp
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
-    platform->window()->height()
-    platform->window()->width()
-    platform->window()->title()
+platform->window()->height()
+platform->window()->width()
+platform->window()->title()
 ```
 
 Also, the `PlatformController` will update the window properties if the size of the window changes.
@@ -453,8 +453,8 @@ passed as the second argument to the `arg` method.
 ```cpp
 
 void setup() override {
-    auto parser = engine::util::ArgParser()->instance();
-    auto fps = parser->arg<int>("--fps", 60);
+auto parser = engine::util::ArgParser()->instance();
+auto fps = parser->arg<int>("--fps", 60);
 }
 ```
 
