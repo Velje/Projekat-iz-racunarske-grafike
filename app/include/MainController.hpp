@@ -4,6 +4,8 @@
 #include <engine/core/Controller.hpp>
 #include <engine/platform/PlatformController.hpp>
 #include <engine/resources/ResourcesController.hpp>
+#include <engine/graphics/GraphicsController.hpp>
+#include <engine/graphics/OpenGL.hpp>
 
 namespace app {
 class MainController : public engine::core::Controller {
@@ -12,7 +14,11 @@ private:
 
     bool loop() override;
 
+    void begin_draw() override;
+
     void draw() override;
+
+    void end_draw() override;
 
     void drawBackpack();
 
