@@ -15,7 +15,7 @@ private:
     bool loop() override;
 
     void update_camera();
-    
+
     void update() override;
 
     void begin_draw() override;
@@ -25,6 +25,8 @@ private:
     void end_draw() override;
 
     void drawBackpack();
+
+    void drawSkybox();
 
     std::string_view name() const override;
 };
