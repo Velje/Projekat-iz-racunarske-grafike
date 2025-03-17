@@ -1,8 +1,17 @@
 #include <MainController.hpp>
+#include <MainPlatformEventObserver.hpp>
 #include <spdlog/spdlog.h>
 
 namespace app {
+
+void MainPlatformEventObserver::on_mouse_move(engine::platform::MousePosition position) {
+    auto camera = engine::core::Controller::get<engine::graphics::GraphicsController>()->camera();
+    camera->rotate_camera(position.dx, position.dy);
+}
+
 void MainController::initialize() {
+    auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
+    platform->register_platform_event_observer(std::make_unique<MainPlatformEventObserver>());
     engine::graphics::OpenGL::enable_depth_testing();
 }
 
@@ -35,6 +44,14 @@ void MainController::update_camera() {
     if (platform->key(engine::platform::KeyId::KEY_D)
                 .is_down()) {
         camera->move_camera(engine::graphics::Camera::Movement::RIGHT, platform->dt());
+    }
+    if (platform->key(engine::platform::KeyId::KEY_SPACE)
+                .is_down()) {
+        camera->move_camera(engine::graphics::Camera::Movement::UP, platform->dt());
+    }
+    if (platform->key(engine::platform::KeyId::KEY_LEFT_CONTROL)
+                .is_down()) {
+        camera->move_camera(engine::graphics::Camera::Movement::DOWN, platform->dt());
     }
 }
 
