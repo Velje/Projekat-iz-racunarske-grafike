@@ -15,6 +15,17 @@ bool MainController::loop() {
     return true;
 }
 
+void MainController::drawBackpack() {
+    auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
+    engine::resources::Model *model = resources->model("backpack");
+    engine::resources::Shader *shader = resources->shader("basic");
+    model->draw(shader);
+}
+
+void MainController::draw() {
+    drawBackpack();
+}
+
 std::string_view MainController::name() const {
     return "app::MainController";
 }
