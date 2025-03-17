@@ -1,10 +1,15 @@
 #include <MainController.hpp>
 #include <MainPlatformEventObserver.hpp>
+#include <GUIController.hpp>
 #include <spdlog/spdlog.h>
 
 namespace app {
 
 void MainPlatformEventObserver::on_mouse_move(engine::platform::MousePosition position) {
+    auto guiController = engine::core::Controller::get<GUIController>();
+    if (guiController->is_enabled()) {
+        return;
+    }
     auto camera = engine::core::Controller::get<engine::graphics::GraphicsController>()->camera();
     camera->rotate_camera(position.dx, position.dy);
 }
@@ -26,6 +31,10 @@ bool MainController::loop() {
 }
 
 void MainController::update_camera() {
+    auto guiController = engine::core::Controller::get<GUIController>();
+    if (guiController->is_enabled()) {
+        return;
+    }
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
     auto camera = graphics->camera();

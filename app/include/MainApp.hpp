@@ -5,6 +5,7 @@
 
 namespace app {
 class MainApp : public engine::core::App {
+private:
     void app_setup() override;
 };
 }
