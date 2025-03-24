@@ -7,8 +7,12 @@ namespace app {
 
 void MainPlatformEventObserver::on_mouse_move(engine::platform::MousePosition position) {
     auto guiController = engine::core::Controller::get<GUIController>();
+    auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     if (guiController->is_enabled()) {
+        platform->set_enable_cursor(true);
         return;
+    } else {
+        platform->set_enable_cursor(false);
     }
     auto camera = engine::core::Controller::get<engine::graphics::GraphicsController>()->camera();
     camera->rotate_camera(position.dx, position.dy);
@@ -32,35 +36,39 @@ bool MainController::loop() {
 
 void MainController::update_camera() {
     auto guiController = engine::core::Controller::get<GUIController>();
-    if (guiController->is_enabled()) {
-        return;
-    }
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
+    if (guiController->is_enabled()) {
+        platform->set_enable_cursor(true);
+        return;
+    } else {
+        platform->set_enable_cursor(false);
+    }
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
     auto camera = graphics->camera();
+    auto deltaTime = platform->dt();
     if (platform->key(engine::platform::KeyId::KEY_W)
                 .is_down()) {
-        camera->move_camera(engine::graphics::Camera::Movement::FORWARD, platform->dt());
+        camera->move_camera(engine::graphics::Camera::Movement::FORWARD, deltaTime);
     }
     if (platform->key(engine::platform::KeyId::KEY_S)
                 .is_down()) {
-        camera->move_camera(engine::graphics::Camera::Movement::BACKWARD, platform->dt());
+        camera->move_camera(engine::graphics::Camera::Movement::BACKWARD, deltaTime);
     }
     if (platform->key(engine::platform::KeyId::KEY_A)
                 .is_down()) {
-        camera->move_camera(engine::graphics::Camera::Movement::LEFT, platform->dt());
+        camera->move_camera(engine::graphics::Camera::Movement::LEFT, deltaTime);
     }
     if (platform->key(engine::platform::KeyId::KEY_D)
                 .is_down()) {
-        camera->move_camera(engine::graphics::Camera::Movement::RIGHT, platform->dt());
+        camera->move_camera(engine::graphics::Camera::Movement::RIGHT, deltaTime);
     }
     if (platform->key(engine::platform::KeyId::KEY_SPACE)
                 .is_down()) {
-        camera->move_camera(engine::graphics::Camera::Movement::UP, platform->dt());
+        camera->move_camera(engine::graphics::Camera::Movement::UP, deltaTime);
     }
     if (platform->key(engine::platform::KeyId::KEY_LEFT_CONTROL)
                 .is_down()) {
-        camera->move_camera(engine::graphics::Camera::Movement::DOWN, platform->dt());
+        camera->move_camera(engine::graphics::Camera::Movement::DOWN, deltaTime);
     }
 }
 

@@ -18,6 +18,7 @@ void GUIController::poll_events() {
 
 void GUIController::draw() {
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+    auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     auto camera = graphics->camera();
     graphics->begin_gui();
     ImGui::Begin("Camera info");
@@ -25,6 +26,9 @@ void GUIController::draw() {
                                                        .x, camera->Position
                                                                  .y, camera->Position
                                                                            .z);
+    auto deltaTime = platform->dt();
+    ImGui::Text("Frames per second: %f", 1 / deltaTime);
+    ImGui::Text("Frame difference: %fms", deltaTime);
     ImGui::End();
     graphics->end_gui();
 }
