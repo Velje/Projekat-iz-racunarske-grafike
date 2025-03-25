@@ -52,6 +52,12 @@ void GraphicsController::terminate() {
     }
 }
 
+void GraphicsPlatformEventObserver::on_scroll(engine::platform::MousePosition position) {
+    m_graphics->perspective_params()
+              .FOV = glm::radians(m_graphics->camera()
+                                            ->Zoom);
+}
+
 void GraphicsPlatformEventObserver::on_window_resize(int width, int height) {
     m_graphics->perspective_params()
               .Width = static_cast<float>(width);

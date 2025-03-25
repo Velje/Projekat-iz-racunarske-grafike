@@ -18,6 +18,11 @@ void MainPlatformEventObserver::on_mouse_move(engine::platform::MousePosition po
     camera->rotate_camera(position.dx, position.dy);
 }
 
+void MainPlatformEventObserver::on_scroll(engine::platform::MousePosition position) {
+    auto camera = engine::core::Controller::get<engine::graphics::GraphicsController>()->camera();
+    camera->zoom(position.scroll);
+}
+
 void MainController::initialize() {
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     platform->register_platform_event_observer(std::make_unique<MainPlatformEventObserver>());
@@ -100,6 +105,19 @@ void MainController::drawSkybox() {
     graphics->draw_skybox(shader, skybox);
 }
 
+void MainController::drawFloor() {
+    auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
+    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+    auto texture = resources->texture("wall");
+    auto shader = resources->shader("textureShader");
+    shader->use();
+    shader->set_mat4("projection", graphics->projection_matrix());
+    shader->set_mat4("view", graphics->camera()
+                                     ->view_matrix());
+    shader->set_mat4("model", glm::mat4(1.0f));
+    shader->set_int("texture0", texture->id());
+}
+
 void MainController::begin_draw() {
     engine::graphics::OpenGL::clear_buffers();
 }
@@ -107,6 +125,7 @@ void MainController::begin_draw() {
 void MainController::draw() {
     drawBackpack();
     drawSkybox();
+    drawFloor();
 }
 
 void MainController::end_draw() {

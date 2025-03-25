@@ -28,6 +28,8 @@ private:
 
     void drawSkybox();
 
+    void drawFloor();
+
     std::string_view name() const override;
 };
 }

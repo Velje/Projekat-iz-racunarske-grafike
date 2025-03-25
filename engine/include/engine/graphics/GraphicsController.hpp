@@ -180,8 +180,11 @@ public:
 
     void on_window_resize(int width, int height) override;
 
+    void on_scroll(platform::MousePosition position) override;
+
 private:
     GraphicsController *m_graphics;
+
 };
 }
 #endif //GRAPHICSCONTROLLER_HPP
