@@ -26,9 +26,13 @@ void GUIController::draw() {
                                                        .x, camera->Position
                                                                  .y, camera->Position
                                                                            .z);
+    ImGui::Text("Mouse position: %f %f", platform->mouse()
+                                                 .x, platform->mouse()
+                                                             .y);
     auto deltaTime = platform->dt();
     ImGui::Text("Frames per second: %f", 1 / deltaTime);
-    ImGui::Text("Frame difference: %fms", deltaTime);
+    ImGui::Text("Frame difference: %fms", deltaTime * 1000);
+
     ImGui::End();
     graphics->end_gui();
 }

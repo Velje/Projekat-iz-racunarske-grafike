@@ -41,7 +41,7 @@ void GraphicsController::initialize() {
     ImGuiIO &io = ImGui::GetIO();
     (void) io;
     RG_GUARANTEE(ImGui_ImplGlfw_InitForOpenGL(handle, true), "ImGUI failed to initialize for OpenGL");
-    RG_GUARANTEE(ImGui_ImplOpenGL3_Init("#version 330 core"), "ImGUI failed to initialize for OpenGL");
+    RG_GUARANTEE(ImGui_ImplOpenGL3_Init("#version 460 core"), "ImGUI failed to initialize for OpenGL");
 }
 
 void GraphicsController::terminate() {

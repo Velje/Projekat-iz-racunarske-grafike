@@ -5,6 +5,7 @@
 namespace engine::resources {
 std::string_view texture_type_to_string(TextureType type) {
     switch (type) {
+        case TextureType::Regular: return "Regular";
         case TextureType::Diffuse: return "Diffuse";
         case TextureType::Specular: return "Specular";
         case TextureType::Normal: return "Normal";
@@ -25,6 +26,7 @@ void Texture::bind(int32_t sampler) {
 
 std::string_view Texture::uniform_name_convention(TextureType type) {
     switch (type) {
+        case TextureType::Regular: return "texture_regular";
         case TextureType::Diffuse: return "texture_diffuse";
         case TextureType::Specular: return "texture_specular";
         case TextureType::Normal: return "texture_normal";

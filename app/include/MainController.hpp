@@ -14,9 +14,11 @@ private:
 
     bool loop() override;
 
-    void update_camera();
+    void poll_events() override;
 
     void update() override;
+
+    void update_camera();
 
     void begin_draw() override;
 
@@ -31,6 +33,7 @@ private:
     void drawFloor();
 
     std::string_view name() const override;
+
 };
 }
 #endif //MAINCONTROLLER_HPP

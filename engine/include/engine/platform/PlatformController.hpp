@@ -85,6 +85,9 @@ public:
         return m_frame_time;
     }
 
+    void update_mouse() {
+    };
+
     /**
     * @brief Get elapsed time for the previous frame.
     *
@@ -146,8 +149,6 @@ private:
     bool loop() override;
 
     void poll_events() override;
-
-    void update_mouse();
 
     void update_key(Key &key_data) const;
 

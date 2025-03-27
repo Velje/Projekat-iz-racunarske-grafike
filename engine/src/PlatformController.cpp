@@ -43,7 +43,7 @@ void PlatformController::initialize() {
     bool glfw_initialized = glfwInit();
     RG_GUARANTEE(glfw_initialized, "GLFW platform failed to initialize_controllers.");
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     util::Configuration::json &config = util::Configuration::config();
@@ -61,6 +61,7 @@ void PlatformController::initialize() {
     glfwSetFramebufferSizeCallback(m_window.handle_(), glfw_framebuffer_size_callback);
     glfwSetMouseButtonCallback(m_window.handle_(), glfw_mouse_button_callback);
     glfwSetWindowCloseCallback(m_window.handle_(), glfw_window_close_callback);
+    glfwSetInputMode(m_window.handle_(), GLFW_RAW_MOUSE_MOTION, true);
 
     int major, minor, revision;
     glfwGetVersion(&major, &minor, &revision);
@@ -191,10 +192,8 @@ void PlatformController::register_platform_event_observer(std::unique_ptr<Platfo
 }
 
 void PlatformController::_platform_on_mouse(double x, double y) {
-    double last_x = g_mouse_position.x;
-    double last_y = g_mouse_position.y;
-    g_mouse_position.dx = x - last_x;
-    g_mouse_position.dy = last_y - y; // because in glfw the top left corner is the (0,0)
+    g_mouse_position.dx = x - g_mouse_position.x;
+    g_mouse_position.dy = g_mouse_position.y - y; // because in glfw the top left corner is the (0,0)
     g_mouse_position.x = x;
     g_mouse_position.y = y;
     for (auto &observer: m_platform_event_observers) {
@@ -253,7 +252,8 @@ void initialize_key_maps() {
 }
 
 static void glfw_mouse_callback(GLFWwindow *window, double x, double y) {
-    core::Controller::get<PlatformController>()->_platform_on_mouse(x, y);
+    auto platform = core::Controller::get<PlatformController>();
+    platform->_platform_on_mouse(x, y);
 }
 
 void glfw_mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
