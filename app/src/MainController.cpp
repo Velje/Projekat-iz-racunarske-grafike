@@ -1,7 +1,6 @@
 #include <MainController.hpp>
 #include <GUIController.hpp>
 #include <MainPlatformEventObserver.hpp>
-#include <spdlog/spdlog.h>
 
 namespace app {
 
@@ -29,6 +28,7 @@ void MainController::poll_events() {
         return;
     } else {
         platform->set_enable_cursor(false);
+        update_camera();
     }
 }
 
@@ -37,6 +37,12 @@ void MainController::update_camera() {
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
     auto camera = graphics->camera();
     auto deltaTime = platform->dt();
+    auto speedMultiplier = 1.0f;
+    if (platform->key(engine::platform::KeyId::KEY_LEFT_SHIFT)
+                .is_down()) {
+        speedMultiplier *= 5.0f;
+    }
+    deltaTime *= speedMultiplier;
     if (platform->key(engine::platform::KeyId::KEY_W)
                 .is_down()) {
         camera->move_camera(engine::graphics::Camera::Movement::FORWARD, deltaTime);
@@ -64,10 +70,6 @@ void MainController::update_camera() {
 }
 
 void MainController::update() {
-    auto guiController = engine::core::Controller::get<GUIController>();
-    if (!guiController->is_enabled()) {
-        update_camera();
-    }
 }
 
 void MainController::drawBackpack() {

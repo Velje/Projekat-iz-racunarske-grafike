@@ -44,6 +44,9 @@ struct FrameTime {
 */
 class PlatformController final : public core::Controller {
 public:
+
+    float getGlfwTime();
+
     /**
     * @brief Get the state of the @ref Key in the current frame
     * @param key An @ref KeyId for the key

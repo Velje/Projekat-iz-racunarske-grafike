@@ -1,0 +1,16 @@
+EventToString = {
+    // Events
+"MOUSE",
+"KEYBOARD",
+"NOTHING",
+    // ActionA
+"PRESS",
+"MOVE",
+"SCROLL",
+"NOTHING_A",
+    // ActionB
+"CAMERA_POSITION",
+"CAMERA_ROTATION",
+"CAMERA_ZOOM",
+"NOTHING_B"
+};

@@ -6,6 +6,7 @@
 #include <engine/resources/ResourcesController.hpp>
 #include <engine/graphics/GraphicsController.hpp>
 #include <engine/graphics/OpenGL.hpp>
+#include <spdlog/spdlog.h>
 
 namespace app {
 class MainController : public engine::core::Controller {

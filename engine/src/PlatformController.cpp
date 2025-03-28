@@ -50,7 +50,8 @@ void PlatformController::initialize() {
     int window_width = config["window"]["width"];
     int window_height = config["window"]["height"];
     std::string window_title = config["window"]["title"];
-    GLFWwindow *handle = glfwCreateWindow(window_width, window_height, window_title.c_str(), nullptr, nullptr);
+    GLFWwindow *handle = glfwCreateWindow(window_width, window_height, window_title.c_str(), nullptr,
+                                          nullptr);
     RG_GUARANTEE(handle, "GLFW3 platform failed to create a Window.");
     m_window = Window(handle, window_width, window_height, window_title);
 
@@ -244,6 +245,10 @@ void PlatformController::set_enable_cursor(bool enabled) {
     }
 }
 
+float PlatformController::getGlfwTime() {
+    return glfwGetTime();
+}
+
 void initialize_key_maps() {
     // @formatter:off
     #include "glfw_key_mapping.include"
@@ -252,8 +257,7 @@ void initialize_key_maps() {
 }
 
 static void glfw_mouse_callback(GLFWwindow *window, double x, double y) {
-    auto platform = core::Controller::get<PlatformController>();
-    platform->_platform_on_mouse(x, y);
+    core::Controller::get<PlatformController>()->_platform_on_mouse(x, y);
 }
 
 void glfw_mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {

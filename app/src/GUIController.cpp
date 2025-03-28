@@ -1,5 +1,5 @@
 #include <GUIController.hpp>
-#include <imgui.h>
+#include <EventController.hpp>
 
 namespace app {
 
@@ -9,9 +9,11 @@ void GUIController::initialize() {
 
 void GUIController::poll_events() {
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
+    auto eventController = engine::core::Controller::get<EventController>();
     if (platform->key(engine::platform::KeyId::KEY_F2)
                 .state() == engine::platform::Key::State::JustPressed
             ) {
+        eventController->set_enable(!eventController->is_enabled());
         set_enable(!is_enabled());
     }
 }

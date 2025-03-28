@@ -4,6 +4,7 @@
 #include <engine/core/Controller.hpp>
 #include <engine/platform/PlatformController.hpp>
 #include <engine/graphics/GraphicsController.hpp>
+#include <imgui.h>
 
 namespace app {
 class GUIController : public engine::core::Controller {

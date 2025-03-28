@@ -2,6 +2,7 @@
 #define MAINAPP_HPP
 
 #include <engine/core/App.hpp>
+#include <spdlog/spdlog.h>
 
 namespace app {
 class MainApp : public engine::core::App {
