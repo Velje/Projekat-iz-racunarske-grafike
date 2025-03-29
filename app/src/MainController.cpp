@@ -4,10 +4,22 @@
 
 namespace app {
 
+static std::unordered_map<engine::platform::KeyId, engine::graphics::Camera::Movement> KeyIdToCameraMovement;
+
+void initialize_keyid_maps();
+
 void MainController::initialize() {
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     platform->register_platform_event_observer(std::make_unique<MainPlatformEventObserver>());
+    KeyIdToCameraMovement.rehash(engine::graphics::Camera::Movement::MOVEMENT_COUNT);
+    initialize_keyid_maps();
     engine::graphics::OpenGL::enable_depth_testing();
+}
+
+void initialize_keyid_maps() {
+    // @formatter:off
+    #include "keyid_to_camera_movement.include"
+    // @formatter:on
 }
 
 bool MainController::loop() {
@@ -37,35 +49,17 @@ void MainController::update_camera() {
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
     auto camera = graphics->camera();
     auto deltaTime = platform->dt();
-    auto speedMultiplier = 1.0f;
-    if (platform->key(engine::platform::KeyId::KEY_LEFT_SHIFT)
-                .is_down()) {
-        speedMultiplier *= 5.0f;
-    }
-    deltaTime *= speedMultiplier;
-    if (platform->key(engine::platform::KeyId::KEY_W)
-                .is_down()) {
-        camera->move_camera(engine::graphics::Camera::Movement::FORWARD, deltaTime);
-    }
-    if (platform->key(engine::platform::KeyId::KEY_S)
-                .is_down()) {
-        camera->move_camera(engine::graphics::Camera::Movement::BACKWARD, deltaTime);
-    }
-    if (platform->key(engine::platform::KeyId::KEY_A)
-                .is_down()) {
-        camera->move_camera(engine::graphics::Camera::Movement::LEFT, deltaTime);
-    }
-    if (platform->key(engine::platform::KeyId::KEY_D)
-                .is_down()) {
-        camera->move_camera(engine::graphics::Camera::Movement::RIGHT, deltaTime);
-    }
-    if (platform->key(engine::platform::KeyId::KEY_UP)
-                .is_down()) {
-        camera->move_camera(engine::graphics::Camera::Movement::UP, deltaTime);
-    }
-    if (platform->key(engine::platform::KeyId::KEY_DOWN)
-                .is_down()) {
-        camera->move_camera(engine::graphics::Camera::Movement::DOWN, deltaTime);
+    for (auto &pair: KeyIdToCameraMovement) {
+        if (platform->key(pair.first)
+                    .is_down()) {
+            if (platform->key(engine::platform::KeyId::KEY_LEFT_SHIFT)
+                        .is_down()) {
+                camera->MovementSpeed = 7.0f;
+            } else {
+                camera->MovementSpeed = 2.5f;
+            }
+            camera->move_camera(pair.second, deltaTime);
+        }
     }
 }
 

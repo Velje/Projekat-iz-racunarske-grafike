@@ -1,0 +1,6 @@
+KeyIdToCameraMovement[engine::platform::KEY_W] = engine::graphics::Camera::Movement::FORWARD;
+KeyIdToCameraMovement[engine::platform::KEY_S] = engine::graphics::Camera::Movement::BACKWARD;
+KeyIdToCameraMovement[engine::platform::KEY_A] = engine::graphics::Camera::Movement::LEFT;
+KeyIdToCameraMovement[engine::platform::KEY_D] = engine::graphics::Camera::Movement::RIGHT;
+KeyIdToCameraMovement[engine::platform::KEY_UP] = engine::graphics::Camera::Movement::UP;
+KeyIdToCameraMovement[engine::platform::KEY_DOWN] = engine::graphics::Camera::Movement::DOWN;
