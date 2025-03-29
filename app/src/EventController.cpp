@@ -4,7 +4,7 @@ namespace app {
 
 void initialize_event_maps();
 
-static std::array<std::string_view, totalEventStrings> EventToString;
+static std::array<std::string_view, EVENTS_ACTIONS_COUNT> EventToString;
 
 void EventController::initialize() {
     initialize_event_maps();
@@ -48,13 +48,14 @@ std::string_view EventController::eventsString(Events &event) {
 }
 
 std::string_view EventController::actionAString(ActionA &actionA) {
-    uint32_t positionOffset = EVENT_COUNT;
-    return EventToString[positionOffset + actionA];
+    return EventToString[static_cast <size_t> (EVENT_COUNT) +
+                         actionA];
 }
 
 std::string_view EventController::actionBString(ActionB &actionB) {
-    uint32_t positionOffset = EVENT_COUNT + ACTIONA_COUNT;
-    return EventToString[positionOffset + actionB];
+    return EventToString[static_cast <size_t> (EVENT_COUNT) +
+                         static_cast <size_t> (ACTIONA_COUNT) +
+                         actionB];
 }
 
 

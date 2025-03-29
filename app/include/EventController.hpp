@@ -29,7 +29,9 @@ enum ActionB {
     ACTIONB_COUNT
 };
 
-const uint32_t totalEventStrings = EVENT_COUNT + ACTIONA_COUNT + ACTIONB_COUNT;
+const static size_t EVENTS_ACTIONS_COUNT = static_cast <size_t> (EVENT_COUNT) +
+                                           static_cast <size_t> (ACTIONA_COUNT) +
+                                           static_cast <size_t> (ACTIONB_COUNT);
 struct Event {
     Events event;
     float eventTime;
