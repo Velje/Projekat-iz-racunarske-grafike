@@ -32,7 +32,9 @@ enum ActionB {
 const static size_t EVENTS_ACTIONS_COUNT = static_cast <size_t> (EVENT_COUNT) +
                                            static_cast <size_t> (ACTIONA_COUNT) +
                                            static_cast <size_t> (ACTIONB_COUNT);
-struct Event {
+
+class Event {
+public:
     Events event;
     float eventTime;
     ActionA actionA;
@@ -42,6 +44,7 @@ struct Event {
 
 class EventController : public engine::core::Controller {
 public:
+
     void notify(Event event);
 
     static std::string_view eventsString(Events &event);
@@ -52,11 +55,9 @@ public:
 
 private:
 
-    std::vector<Event> events{};
+    static void logEvent(Event &event);
 
-    void logEvent(Event &event);
-
-    void logEvents();
+    static void logEvents();
 
     void initialize() override;
 

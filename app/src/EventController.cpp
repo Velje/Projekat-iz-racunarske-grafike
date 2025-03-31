@@ -5,6 +5,7 @@ namespace app {
 void initialize_event_maps();
 
 static std::array<std::string_view, EVENTS_ACTIONS_COUNT> EventToString;
+static std::vector<Event> events;
 
 void EventController::initialize() {
     initialize_event_maps();

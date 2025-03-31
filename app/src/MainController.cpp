@@ -5,14 +5,36 @@
 namespace app {
 
 static std::unordered_map<engine::platform::KeyId, engine::graphics::Camera::Movement> KeyIdToCameraMovement;
+static std::vector<engine::resources::Vertex> vertices;
+static std::vector<uint32_t> indices;
+static std::vector<engine::resources::Texture *> textures;
+static std::unique_ptr<engine::resources::Mesh> mesh;
 
 void initialize_keyid_maps();
 
 void MainController::initialize() {
+    auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     platform->register_platform_event_observer(std::make_unique<MainPlatformEventObserver>());
     KeyIdToCameraMovement.rehash(engine::graphics::Camera::Movement::MOVEMENT_COUNT);
     initialize_keyid_maps();
+    vertices = {
+            engine::resources::Vertex(glm::vec3(0.5f, 0.5f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 1.0f),
+                                      glm::vec3(0.0f)),  // top right
+            engine::resources::Vertex(glm::vec3(0.5f, -0.5f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 0.0f),
+                                      glm::vec3(0.0f)), // bottom right
+            engine::resources::Vertex(glm::vec3(-0.5f, -0.5f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 0.0f),
+                                      glm::vec3(0.0f)),  // bottom left
+            engine::resources::Vertex(glm::vec3(-0.5f, 0.5f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 1.0f),
+                                      glm::vec3(0.0f))  // top left
+    };
+    indices = {  // note that we start from 0!
+            0, 1, 3,   // first triangle
+            1, 2, 3    // second triangle
+    };
+    auto texture0 = resources->texture("wall", "", engine::resources::TextureType::Regular, true);
+    textures = {texture0};
+    mesh = std::make_unique<engine::resources::Mesh>(vertices, indices, textures);
     engine::graphics::OpenGL::enable_depth_testing();
 }
 
@@ -76,8 +98,16 @@ void MainController::drawBackpack() {
     shader->set_mat4("view", graphics->camera()
                                      ->view_matrix());
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::scale(model, glm::vec3(0.3f));
+    model = glm::translate(model, glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat3 normalModelMatrix = glm::mat3(glm::transpose(glm::inverse(model)));
     shader->set_mat4("model", model);
+    shader->set_mat3("normalModelMatrix", normalModelMatrix);
+    shader->set_vec3("viewPos", graphics->camera()
+                                        ->Position);
+    shader->set_vec3("light.position", glm::vec3(2.0f, 2.0f, 0.5f));
+    shader->set_float("light.constant", 1.0f);
+    shader->set_float("light.linear", 0.09f);
+    shader->set_float("light.quadratic", 0.032f);
     backpack->draw(shader);
 }
 
@@ -92,23 +122,6 @@ void MainController::drawSkybox() {
 void MainController::drawFloor() {
     auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
-    auto texture0 = resources->texture("wall", "", engine::resources::TextureType::Regular, true);
-    std::vector<engine::resources::Vertex> vertices = {
-            engine::resources::Vertex(glm::vec3(0.5f, 0.5f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 1.0f),
-                                      glm::vec3(0.0f)),  // top right
-            engine::resources::Vertex(glm::vec3(0.5f, -0.5f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 0.0f),
-                                      glm::vec3(0.0f)), // bottom right
-            engine::resources::Vertex(glm::vec3(-0.5f, -0.5f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 0.0f),
-                                      glm::vec3(0.0f)),  // bottom left
-            engine::resources::Vertex(glm::vec3(-0.5f, 0.5f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 1.0f),
-                                      glm::vec3(0.0f))  // top left
-    };
-    std::vector<uint32_t> indices = {  // note that we start from 0!
-            0, 1, 3,   // first triangle
-            1, 2, 3    // second triangle
-    };
-    std::vector<engine::resources::Texture *> textures = {texture0};
-    std::unique_ptr Mesh = std::make_unique<engine::resources::Mesh>(vertices, indices, textures);
     auto shader = resources->shader("textureShader");
     shader->use();
     shader->set_mat4("projection", graphics->projection_matrix());
@@ -119,7 +132,7 @@ void MainController::drawFloor() {
     model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     model = glm::scale(model, glm::vec3(10.0f));
     shader->set_mat4("model", model);
-    Mesh->draw(shader);
+    mesh->draw(shader);
 }
 
 void MainController::begin_draw() {
