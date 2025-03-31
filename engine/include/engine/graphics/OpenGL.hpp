@@ -141,12 +141,15 @@ public:
     */
     static std::string get_compilation_error_message(uint32_t shader_id);
 
+    static void enable_framebuffer_srgb();
+
 private:
     /**
     * @brief Throws an engine::util::EngineError of type @ref engine::util::EngineError::Type::OpenGLError if an OpenGL error occurred. Used internally.
     * @param location Source location from where the OpenGL call was made.
     */
     static void assert_no_error(std::source_location location);
+
 };
 }
 #endif //OPENGL_HPP

@@ -19,7 +19,7 @@ private:
 
     void update() override;
 
-    void update_camera();
+    static void update_camera();
 
     void begin_draw() override;
 

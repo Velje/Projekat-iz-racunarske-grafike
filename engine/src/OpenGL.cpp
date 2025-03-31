@@ -173,6 +173,10 @@ void OpenGL::enable_depth_testing() {
     CHECKED_GL_CALL(glEnable, GL_DEPTH_TEST);
 }
 
+void OpenGL::enable_framebuffer_srgb() {
+    CHECKED_GL_CALL(glEnable, GL_FRAMEBUFFER_SRGB);
+}
+
 void OpenGL::disable_depth_testing() {
     CHECKED_GL_CALL(glDisable, GL_DEPTH_TEST);
 }
