@@ -65,8 +65,8 @@ void main() {
             vec3 lightDir = normalize(-dirLight[i].direction);
             vec3 reflectDir = reflect(-lightDir, meshNormal);
             vec3 ambient = dirLight[i].ambientStrength * dirLight[i].color;
-            vec3 diffuse = dirLight[i].diffuseStrength * calculateDiffuse(meshNormal, lightDir) * floorDiffuse;
-            vec3 specular = dirLight[i].specularStrength * calculateSpecular(viewDir, reflectDir, dirLight[i].shininess);
+            vec3 diffuse = dirLight[i].diffuseStrength * calculateDiffuse(meshNormal, lightDir) * dirLight[i].color * floorDiffuse;
+            vec3 specular = dirLight[i].specularStrength * calculateSpecular(viewDir, reflectDir, dirLight[i].shininess) * dirLight[i].color;
             float distance = length(dirLight[i].direction - FragPos);
             result += (ambient + diffuse + specular) / (dirLight[i].constant + dirLight[i].linear * distance + dirLight[i].quadratic * distance * distance);
         }
