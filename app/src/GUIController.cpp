@@ -1,11 +1,12 @@
 #include <GUIController.hpp>
 #include <EventController.hpp>
+#include <LightController.hpp>
 
 namespace app {
 
 static glm::vec3 lightColor(1.0f);
-static glm::vec3 ambientStrength, diffuseStrength(4.0f), specularStrength(10.0f);
-static float shininess = 128.0f;
+static glm::vec3 ambientStrength(0.0f), diffuseStrength(1.0f), specularStrength(1.0f);
+static float shininess = 1024.0f;
 
 void GUIController::initialize() {
     set_enable(false);
@@ -23,6 +24,7 @@ void GUIController::poll_events() {
 }
 
 void GUIController::draw() {
+    auto light = engine::core::Controller::get<LightController>();
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
@@ -45,13 +47,17 @@ void GUIController::draw() {
     ImGui::DragFloat3("diffuseStrength", glm::value_ptr(diffuseStrength), 0.01, 0.0f, 100.0f);
     ImGui::DragFloat3("specularStrength", glm::value_ptr(specularStrength), 0.01, 0.0f, 100.0f);
     ImGui::DragFloat("shininess", &shininess, 0.01f, 0.0f, 2048.0f);
-    engine::resources::Shader *shader = resources->shader("basic");
-    shader->use();
-    shader->set_vec3("light.color", lightColor);
-    shader->set_vec3("light.ambientStrength", ambientStrength);
-    shader->set_vec3("light.diffuseStrength", diffuseStrength);
-    shader->set_vec3("light.specularStrength", specularStrength);
-    shader->set_float("light.shininess", shininess);
+    light->updatePoint(
+            PointLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
+                             1.0f, 0.09f, 0.032f, shininess), glm::vec3(2.0f, 2.0f, 2.5f)), 0);
+    light->updatePoint(
+            PointLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
+                             1.0f, 0.09f, 0.032f, shininess), glm::vec3(-2.0f, 2.0f, -2.5f)), 1);
+    light->updateDirectional(DirectionalLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
+                                                    1.0f, 0.09f, 0.032f, shininess), glm::vec3(-1.0f, -1.0f, 1.0f)),
+                             0);
+    light->updateDirectional(DirectionalLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
+                                                    1.0f, 0.09f, 0.032f, shininess), glm::vec3(1.0f, -0.5f, -1.0f)), 1);
     ImGui::End();
     graphics->end_gui();
 }

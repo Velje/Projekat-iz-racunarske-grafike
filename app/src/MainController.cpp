@@ -1,6 +1,7 @@
 #include <MainController.hpp>
 #include <GUIController.hpp>
 #include <MainPlatformEventObserver.hpp>
+#include <LightController.hpp>
 
 namespace app {
 
@@ -19,20 +20,21 @@ void MainController::initialize() {
     KeyIdToCameraMovement.rehash(engine::graphics::Camera::Movement::MOVEMENT_COUNT);
     initialize_keyid_maps();
     vertices = {
-            engine::resources::Vertex(glm::vec3(0.5f, 0.5f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 1.0f),
-                                      glm::vec3(0.0f)),  // top right
-            engine::resources::Vertex(glm::vec3(0.5f, -0.5f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 0.0f),
-                                      glm::vec3(0.0f)), // bottom right
-            engine::resources::Vertex(glm::vec3(-0.5f, -0.5f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 0.0f),
-                                      glm::vec3(0.0f)),  // bottom left
-            engine::resources::Vertex(glm::vec3(-0.5f, 0.5f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 1.0f),
-                                      glm::vec3(0.0f))  // top left
+            engine::resources::Vertex(glm::vec3(0.5f, 0.5f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f),
+                                      glm::vec2(1.0f, 1.0f)),  // top right
+            engine::resources::Vertex(glm::vec3(0.5f, -0.5f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f),
+                                      glm::vec2(1.0f, 0.0f)), // bottom right
+            engine::resources::Vertex(glm::vec3(-0.5f, -0.5f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f),
+                                      glm::vec2(0.0f, 0.0f)),  // bottom left
+            engine::resources::Vertex(glm::vec3(-0.5f, 0.5f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f),
+                                      glm::vec2(0.0f, 1.0f)
+            )  // top left
     };
     indices = {  // note that we start from 0!
             0, 1, 3,   // first triangle
             1, 2, 3    // second triangle
     };
-    auto texture0 = resources->texture("wall", "", engine::resources::TextureType::Regular, true);
+    auto texture0 = resources->texture("wall", "", engine::resources::TextureType::Diffuse, true);
     textures = {texture0};
     mesh = std::make_unique<engine::resources::Mesh>(vertices, indices, textures);
     engine::graphics::OpenGL::enable_depth_testing();
@@ -55,15 +57,6 @@ bool MainController::loop() {
 }
 
 void MainController::poll_events() {
-    auto guiController = engine::core::Controller::get<GUIController>();
-    auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
-    if (guiController->is_enabled()) {
-        platform->set_enable_cursor(true);
-        return;
-    } else {
-        platform->set_enable_cursor(false);
-        update_camera();
-    }
 }
 
 void MainController::update_camera() {
@@ -86,9 +79,19 @@ void MainController::update_camera() {
 }
 
 void MainController::update() {
+    auto guiController = engine::core::Controller::get<GUIController>();
+    auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
+    if (guiController->is_enabled()) {
+        platform->set_enable_cursor(true);
+        return;
+    } else {
+        update_camera();
+        platform->set_enable_cursor(false);
+    }
 }
 
 void MainController::drawBackpack() {
+    auto light = engine::core::Controller::get<LightController>();
     auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
     engine::resources::Model *backpack = resources->model("backpack");
@@ -99,16 +102,18 @@ void MainController::drawBackpack() {
                                      ->view_matrix());
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat3 normalModelMatrix = glm::mat3(glm::transpose(glm::inverse(model)));
     shader->set_mat4("model", model);
-    shader->set_mat3("normalModelMatrix", normalModelMatrix);
+    shader->set_mat3("normalModelMatrix", glm::mat3(glm::transpose(glm::inverse(model))));
     shader->set_vec3("viewPos", graphics->camera()
                                         ->Position);
-    shader->set_vec3("light.position", glm::vec3(2.0f, 2.0f, 0.5f));
-    shader->set_float("light.constant", 1.0f);
-    shader->set_float("light.linear", 0.09f);
-    shader->set_float("light.quadratic", 0.032f);
+    auto pointLights = light->getPointLights();
+    light->setShaderPointLights(shader, "light", pointLights);
     backpack->draw(shader);
+    shader->set_mat4("model", glm::mat4(glm::translate(model, glm::vec3(4.0f, 0.0f, 0.0f))));
+    backpack->draw(shader);
+    shader->set_mat4("model", glm::mat4(glm::translate(model, glm::vec3(-4.0f, 0.0f, 0.0f))));
+    backpack->draw(shader);
+
 }
 
 void MainController::drawSkybox() {
@@ -120,6 +125,7 @@ void MainController::drawSkybox() {
 }
 
 void MainController::drawFloor() {
+    auto light = engine::core::Controller::get<LightController>();
     auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
     auto shader = resources->shader("textureShader");
@@ -132,6 +138,11 @@ void MainController::drawFloor() {
     model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     model = glm::scale(model, glm::vec3(10.0f));
     shader->set_mat4("model", model);
+    shader->set_mat3("normalModelMatrix", glm::mat3(glm::transpose(glm::inverse(model))));
+    shader->set_vec3("viewPos", graphics->camera()
+                                        ->Position);
+    auto dirLights = light->getDirectionalLights();
+    light->setShaderDirLights(shader, "dirLight", dirLights);
     mesh->draw(shader);
 }
 

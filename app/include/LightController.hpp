@@ -2,15 +2,14 @@
 #define LIGHTCONTROLLER_HPP
 
 #include <engine/core/Controller.hpp>
-#include <list>
+#include <engine/resources/Shader.hpp>
+#include <array>
 #include <glm/glm.hpp>
 
 namespace app {
 
-class PointLight {
+class Light {
 public:
-    bool enabled;
-    glm::vec3 position;
     glm::vec3 color;
     glm::vec3 ambientStrength;
     glm::vec3 diffuseStrength;
@@ -19,40 +18,59 @@ public:
     float linear;
     float quadratic;
     float shininess;
+    bool enabled = true;
 };
 
-class DirectionalLight : public PointLight {
+class PointLight : public Light {
+public:
+    glm::vec3 position;
+};
+
+class DirectionalLight : public Light {
 public:
     glm::vec3 direction;
 };
 
-class SpotLight : public PointLight {
+class SpotLight : public Light {
 public:
     glm::vec3 direction;
     float cutOff;
     float outerCutOff;
 };
 
+const static size_t NR_POINT_LIGHTS = 2;
+const static size_t NR_DIR_LIGHTS = 2;
+const static size_t NR_SPOT_LIGHTS = 2;
+
 class LightController : public engine::core::Controller {
 public:
 
-    static std::list<PointLight> &getPointLights();
+    const std::array<PointLight, NR_POINT_LIGHTS> &getPointLights();
 
-    static std::list<DirectionalLight> &getDirectionalLights();
+    const std::array<DirectionalLight, NR_DIR_LIGHTS> &getDirectionalLights();
 
-    static std::list<SpotLight> &getSpotLights();
+    const std::array<SpotLight, NR_SPOT_LIGHTS> &getSpotLights();
 
-    static void addPoint(PointLight light);
+    void updatePoint(PointLight newLight, size_t index);
 
-    static void addDirectional(DirectionalLight light);
+    void setShaderPointLights(engine::resources::Shader *shader, const std::string &name,
+                              std::array<PointLight, NR_POINT_LIGHTS> &lights);
 
-    static void addSpot(SpotLight light);
+    void updateDirectional(DirectionalLight newLight, size_t index);
 
-    static void togglePoint(PointLight &light);
+    void setShaderDirLights(engine::resources::Shader *shader, const std::string &name,
+                            std::array<DirectionalLight, NR_DIR_LIGHTS> &lights);
 
-    static void toggleDirectional(DirectionalLight &light);
+    void updateSpot(SpotLight newLight, size_t index);
 
-    static void toggleSpot(SpotLight &light);
+    void setShaderSpotLights(engine::resources::Shader *shader, const std::string &name,
+                             std::array<SpotLight, NR_SPOT_LIGHTS> &lights);
+
+    void togglePoint(PointLight &light);
+
+    void toggleDirectional(DirectionalLight &light);
+
+    void toggleSpot(SpotLight &light);
 
 private:
 

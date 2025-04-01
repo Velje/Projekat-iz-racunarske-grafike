@@ -10,6 +10,9 @@
 
 namespace app {
 class MainController : public engine::core::Controller {
+public:
+    static void update_camera();
+
 private:
     void initialize() override;
 
@@ -18,8 +21,6 @@ private:
     void poll_events() override;
 
     void update() override;
-
-    static void update_camera();
 
     void begin_draw() override;
 

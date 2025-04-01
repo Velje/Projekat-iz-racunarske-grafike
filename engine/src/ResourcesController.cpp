@@ -281,10 +281,12 @@ void AssimpSceneProcessor::process_material_type(std::vector<Texture *> &texture
 
 TextureType AssimpSceneProcessor::assimp_texture_type_to_engine(aiTextureType type) {
     switch (type) {
+        case aiTextureType_UNKNOWN: return TextureType::Regular;
         case aiTextureType_DIFFUSE: return TextureType::Diffuse;
         case aiTextureType_SPECULAR: return TextureType::Specular;
         case aiTextureType_HEIGHT: return TextureType::Height;
         case aiTextureType_NORMALS: return TextureType::Normal;
+        case aiTextureType_AMBIENT_OCCLUSION: return TextureType::AO;
         default: RG_SHOULD_NOT_REACH_HERE("Engine currently doesn't support the aiTextureType: {}",
                                           static_cast<int>(type));
     }
