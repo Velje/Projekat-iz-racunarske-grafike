@@ -59,5 +59,4 @@ std::string_view EventController::actionBString(ActionB &actionB) {
                          actionB];
 }
 
-
 }
