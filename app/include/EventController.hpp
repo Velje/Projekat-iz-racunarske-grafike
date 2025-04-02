@@ -6,58 +6,63 @@
 
 namespace app {
 
-enum Events {
-    EVENT_MOUSE,
-    EVENT_KEYBOARD,
-    EVENT_NOTHING,
-    EVENT_COUNT
-};
-
-enum ActionA {
+enum Actions {
     PRESS,
     MOVE,
     SCROLL,
-    NOTHING_A,
-    ACTIONA_COUNT
+    NOTHING,
+    ACTIONS_COUNT
 };
 
-enum ActionB {
-    CAMERA_POSITION,
+enum EventA {
+    MOUSE = ACTIONS_COUNT,
+    KEYBOARD,
+    NOTHING_A,
+    EVENTA_COUNT
+};
+
+enum EventB {
+    CAMERA_POSITION = EVENTA_COUNT,
     CAMERA_ROTATION,
     CAMERA_ZOOM,
+    CAMERA_SPEED_INCREASED,
+    CAMERA_SPEED_STANDARD,
+    CAMERA_SPEED_DECREASED,
+    GUI_TOGGLE,
     NOTHING_B,
-    ACTIONB_COUNT
+    EVENTB_COUNT
 };
 
-const static size_t EVENTS_ACTIONS_COUNT = static_cast <size_t> (EVENT_COUNT) +
-                                           static_cast <size_t> (ACTIONA_COUNT) +
-                                           static_cast <size_t> (ACTIONB_COUNT);
+const static size_t ACTIONS_EVENTS_COUNT = EVENTB_COUNT;
 
-class Event {
+class Action {
 public:
-    Events event;
-    float eventTime;
-    ActionA actionA;
+    Actions action;
     float actionTime;
-    ActionB actionB;
+    EventA eventA;
+    float eventTime;
+    EventB eventB;
 };
 
 class EventController : public engine::core::Controller {
 public:
 
-    void notify(Event event);
+    void notify(Action action);
 
-    static std::string_view eventsString(Events &event);
+    void instaLog(Action action);
 
-    static std::string_view actionBString(ActionB &actionB);
+    static std::string_view actionsString(Actions &action);
 
-    static std::string_view actionAString(ActionA &actionA);
+    static std::string_view eventAString(EventA &eventA);
+
+    static std::string_view eventBString(EventB &eventB);
+
 
 private:
 
-    static void logEvent(Event &event);
+    static void logActions();
 
-    static void logEvents();
+    static void logAction(Action &action);
 
     void initialize() override;
 

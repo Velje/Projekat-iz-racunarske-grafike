@@ -13,6 +13,8 @@ class MainController : public engine::core::Controller {
 public:
     static void update_camera();
 
+    const std::unordered_map<engine::platform::KeyId, engine::graphics::Camera::Movement> &getKeyIdToCameraMovement();
+
 private:
     void initialize() override;
 

@@ -2,61 +2,69 @@
 
 namespace app {
 
-void initialize_event_maps();
+void initialize_action_maps();
 
-static std::array<std::string_view, EVENTS_ACTIONS_COUNT> EventToString;
-static std::vector<Event> events;
+static std::array<std::string_view, ACTIONS_EVENTS_COUNT> ActionToString;
+static std::vector<Action> actions;
 
 void EventController::initialize() {
-    initialize_event_maps();
+    initialize_action_maps();
 }
 
-void initialize_event_maps() {
+void initialize_action_maps() {
     // @formatter:off
-    #include "event_to_string.include"
+    #include "action_to_string.include"
     // @formatter:on
 }
 
 void EventController::poll_events() {
     if (is_enabled()) {
-        logEvents();
+        logActions();
     }
 }
 
-void EventController::notify(Event event) {
-    events.push_back(event);
+void EventController::notify(Action action) {
+    actions.push_back(action);
 }
 
-void EventController::logEvent(Event &event) {
+void EventController::logAction(Action &action) {
     spdlog::info("{0} ---> after {1:.2f}s ---> {2} ---> after {3:.2f}s ---> {4}",
-                 eventsString(event.event), event.eventTime, actionAString(event.actionA), event.actionTime,
-                 actionBString(event.actionB));
+                 actionsString(action.action), action.eventTime, eventAString(action.eventA), action.actionTime,
+                 eventBString(action.eventB));
 }
 
-void EventController::logEvents() {
-    for (auto &event: events) {
-        logEvent(event);
+void EventController::instaLog(Action action) {
+    spdlog::info("{0} ---> after {1:.2f}s ---> {2} ---> after {3:.2f}s ---> {4}",
+                 actionsString(action.action), action.eventTime, eventAString(action.eventA), action.actionTime,
+                 eventBString(action.eventB));
+}
+
+void EventController::logActions() {
+    if (actions.empty()) {
+        auto eventController = engine::core::Controller::get<EventController>();
+        eventController->instaLog(Action(Actions::NOTHING, 0, EventA::NOTHING_A, 0, EventB::NOTHING_B));
+    } else {
+        for (auto &action: actions) {
+            logAction(action);
+        }
+        actions.clear();
     }
-    events.clear();
 }
 
 std::string_view EventController::name() const {
     return "app::EventController";
 }
 
-std::string_view EventController::eventsString(Events &event) {
-    return EventToString[event];
+std::string_view EventController::actionsString(Actions &action) {
+    return ActionToString[action];
 }
 
-std::string_view EventController::actionAString(ActionA &actionA) {
-    return EventToString[static_cast <size_t> (EVENT_COUNT) +
-                         actionA];
+std::string_view EventController::eventAString(EventA &eventA) {
+    return ActionToString[eventA];
 }
 
-std::string_view EventController::actionBString(ActionB &actionB) {
-    return EventToString[static_cast <size_t> (EVENT_COUNT) +
-                         static_cast <size_t> (ACTIONA_COUNT) +
-                         actionB];
+std::string_view EventController::eventBString(EventB &eventB) {
+    return ActionToString[eventB];
 }
 
 }

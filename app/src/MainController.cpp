@@ -2,10 +2,16 @@
 #include <GUIController.hpp>
 #include <MainPlatformEventObserver.hpp>
 #include <LightController.hpp>
+#include <EventController.hpp>
 
 namespace app {
 
 static std::unordered_map<engine::platform::KeyId, engine::graphics::Camera::Movement> KeyIdToCameraMovement;
+
+const std::unordered_map<engine::platform::KeyId, engine::graphics::Camera::Movement> &MainController::getKeyIdToCameraMovement() {
+    return KeyIdToCameraMovement;
+}
+
 static std::vector<engine::resources::Vertex> vertices;
 static std::vector<uint32_t> indices;
 static std::vector<engine::resources::Texture *> textures;
@@ -62,18 +68,36 @@ void MainController::poll_events() {
 void MainController::update_camera() {
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+    auto eventController = engine::core::Controller::get<EventController>();
     auto camera = graphics->camera();
     auto deltaTime = platform->dt();
     for (auto &pair: KeyIdToCameraMovement) {
         if (platform->key(pair.first)
                     .is_down()) {
+            float actionStart = platform->getGlfwTime();
+            float actionEnd = platform->getGlfwTime();
+            float eventStart = platform->getGlfwTime();
+            float eventEnd;
             if (platform->key(engine::platform::KeyId::KEY_LEFT_SHIFT)
                         .is_down()) {
                 camera->MovementSpeed = 7.0f;
+                eventEnd = platform->getGlfwTime();
+                eventController->notify(
+                        Action(Actions::PRESS, actionEnd - actionStart, EventA::KEYBOARD, eventEnd - eventStart,
+                               EventB::CAMERA_SPEED_INCREASED));
             } else {
                 camera->MovementSpeed = 2.5f;
+                eventEnd = platform->getGlfwTime();
+                eventController->notify(
+                        Action(Actions::PRESS, actionEnd - actionStart, EventA::KEYBOARD, eventEnd - eventStart,
+                               EventB::CAMERA_SPEED_STANDARD));
             }
+            eventStart = platform->getGlfwTime();
             camera->move_camera(pair.second, deltaTime);
+            eventEnd = platform->getGlfwTime();
+            eventController->notify(
+                    Action(Actions::PRESS, actionEnd - actionStart, EventA::KEYBOARD, eventEnd - eventStart,
+                           EventB::CAMERA_POSITION));
         }
     }
 }
@@ -157,8 +181,7 @@ void MainController::draw() {
 }
 
 void MainController::end_draw() {
-    auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
-    platform->swap_buffers();
+    engine::core::Controller::get<engine::platform::PlatformController>()->swap_buffers();
 }
 
 std::string_view MainController::name() const {

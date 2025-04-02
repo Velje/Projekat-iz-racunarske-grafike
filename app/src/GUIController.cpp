@@ -18,7 +18,14 @@ void GUIController::poll_events() {
     if (platform->key(engine::platform::KeyId::KEY_F2)
                 .state() == engine::platform::Key::State::JustPressed
             ) {
+        auto actionStart = platform->getGlfwTime();
+        auto actionEnd = platform->getGlfwTime();
+        auto eventStart = platform->getGlfwTime();
         eventController->set_enable(!eventController->is_enabled());
+        auto eventEnd = platform->getGlfwTime();
+        eventController->instaLog(
+                Action(Actions::PRESS, actionEnd - actionStart, EventA::KEYBOARD, eventEnd - eventStart,
+                       EventB::GUI_TOGGLE));
         set_enable(!is_enabled());
     }
 }
@@ -54,10 +61,10 @@ void GUIController::draw() {
             PointLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
                              1.0f, 0.09f, 0.032f, shininess), glm::vec3(-2.0f, 2.0f, -2.5f)), 1);
     light->updateDirectional(DirectionalLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
-                                                    1.0f, 0.09f, 0.032f, shininess), glm::vec3(-1.0f, -1.0f, 1.0f)),
+                                                    1.0f, 0.09f, 0.232f, shininess), glm::vec3(-1.0f, -1.0f, 1.0f)),
                              0);
     light->updateDirectional(DirectionalLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
-                                                    1.0f, 0.09f, 0.032f, shininess), glm::vec3(1.0f, -0.5f, -1.0f)), 1);
+                                                    1.0f, 0.09f, 0.232f, shininess), glm::vec3(-1.0f, -1.0f, 1.0f)), 1);
     ImGui::End();
     graphics->end_gui();
 }
