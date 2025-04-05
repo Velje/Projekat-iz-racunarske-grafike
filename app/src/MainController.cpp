@@ -44,6 +44,7 @@ void MainController::initialize() {
     textures = {texture0};
     mesh = std::make_unique<engine::resources::Mesh>(vertices, indices, textures);
     engine::graphics::OpenGL::enable_depth_testing();
+    engine::graphics::OpenGL::enable_antialiasing();
 }
 
 void initialize_keyid_maps() {
@@ -131,11 +132,9 @@ void MainController::drawBackpack() {
     shader->set_vec3("viewPos", graphics->camera()
                                         ->Position);
     auto pointLights = light->getPointLights();
+    auto dirLights = light->getDirectionalLights();
     light->setShaderPointLights(shader, "light", pointLights);
-    backpack->draw(shader);
-    shader->set_mat4("model", glm::mat4(glm::translate(model, glm::vec3(4.0f, 0.0f, 0.0f))));
-    backpack->draw(shader);
-    shader->set_mat4("model", glm::mat4(glm::translate(model, glm::vec3(-4.0f, 0.0f, 0.0f))));
+    light->setShaderDirLights(shader, "dirLight", dirLights);
     backpack->draw(shader);
 
 }

@@ -185,6 +185,10 @@ void OpenGL::clear_buffers() {
     CHECKED_GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
+void OpenGL::enable_antialiasing() {
+    CHECKED_GL_CALL(glEnable, GL_MULTISAMPLE);
+}
+
 uint32_t face_index(std::string_view name) {
     if (name == "right") {
         return 0;

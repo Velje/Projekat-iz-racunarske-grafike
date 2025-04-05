@@ -143,6 +143,8 @@ public:
 
     static void enable_framebuffer_srgb();
 
+    static void enable_antialiasing();
+
 private:
     /**
     * @brief Throws an engine::util::EngineError of type @ref engine::util::EngineError::Type::OpenGLError if an OpenGL error occurred. Used internally.

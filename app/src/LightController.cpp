@@ -89,7 +89,6 @@ void LightController::setShaderDirLights(engine::resources::Shader *shader, cons
         shader->set_float(name + "[" + std::to_string(i) + "].quadratic", lights[i].quadratic);
         shader->set_float(name + "[" + std::to_string(i) + "].shininess", lights[i].shininess);
         shader->set_bool(name + "[" + std::to_string(i) + "].enabled", lights[i].enabled);
-
     }
 }
 
