@@ -38,8 +38,8 @@ public:
     float outerCutOff;
 };
 
-const static size_t NR_POINT_LIGHTS = 2;
-const static size_t NR_DIR_LIGHTS = 2;
+const static size_t NR_POINT_LIGHTS = 8;
+const static size_t NR_DIR_LIGHTS = 4;
 const static size_t NR_SPOT_LIGHTS = 2;
 
 class LightController : public engine::core::Controller {

@@ -224,7 +224,7 @@ The `resources/models/` directory stores all the models. Let's add a backpack mo
 5. Use the model in your App:
 
 ```cpp
-    Model* backpack = engine::core::Controller::get<engine::resources::ResourcesController>()->model("backpack");
+    Model* backpack = engine::core::Controller::get<engine::resources::ResourcesController>()->model("brown_mud");
 Shader* shader   = ...
 backpack->draw(shader);
 ```

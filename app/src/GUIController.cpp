@@ -5,8 +5,10 @@
 namespace app {
 
 static glm::vec3 lightColor(1.0f);
-static glm::vec3 ambientStrength(0.0f), diffuseStrength(1.0f), specularStrength(1.0f);
-static float shininess = 1024.0f;
+static glm::vec3 ambientStrength(12.0f, 2.0f, 122.0f), diffuseStrength(11.0f, 12.0f, 122.f), specularStrength(332.0f,
+                                                                                                              122.0f,
+                                                                                                              123.0f);
+static float shininess = 1.0f;
 
 void GUIController::initialize() {
     set_enable(false);
@@ -50,20 +52,32 @@ void GUIController::draw() {
     ImGui::Text("Frame difference: %fms", deltaTime * 1000);
     ImGui::Text("Light control");
     ImGui::ColorEdit3("color", glm::value_ptr(lightColor));
-    ImGui::DragFloat3("ambientStrength", glm::value_ptr(ambientStrength), 0.01, 0.0f, 100.0f);
-    ImGui::DragFloat3("diffuseStrength", glm::value_ptr(diffuseStrength), 0.01, 0.0f, 100.0f);
-    ImGui::DragFloat3("specularStrength", glm::value_ptr(specularStrength), 0.01, 0.0f, 100.0f);
-    ImGui::DragFloat("shininess", &shininess, 0.01f, 0.0f, 2048.0f);
+    ImGui::DragFloat3("ambientStrength", glm::value_ptr(ambientStrength), 20.0f, 0.0f, 10000.0f);
+    ImGui::DragFloat3("diffuseStrength", glm::value_ptr(diffuseStrength), 20.0f, 0.0f, 10000.0f);
+    ImGui::DragFloat3("specularStrength", glm::value_ptr(specularStrength), 20.0f, 0.0f, 10000.0f);
+    ImGui::DragFloat("shininess", &shininess, 2.0f, 0.0f, 2048.0f);
     for (size_t i = 0; i < NR_POINT_LIGHTS; i++) {
-        auto flipXZ = i % 2 ? glm::vec3(1.0f, 0.0f, 1.0f) : glm::vec3(-1.0f, 0.0f, -1.0f);
         light->updatePoint(
                 PointLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
-                                 1.0f, 0.09f, 2.232f, shininess, false), flipXZ * glm::vec3(2.0f, 2.0f, 2.5f)), i);
+                                 1.0f, 0.09f, 0.232f, shininess),
+                           glm::vec3(sin(2 * i * M_PI / NR_POINT_LIGHTS) * 80.0f, 4.0f,
+                                     cos(2 * i * M_PI / NR_POINT_LIGHTS) * 80.0f)),
+                i);
     }
     for (size_t i = 0; i < NR_DIR_LIGHTS; i++) {
-        light->updateDirectional(DirectionalLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
-                                                        1.0f, 0.09f, 0.232f, shininess), glm::vec3(1.0f, -1.0f, 1.0f)),
-                                 i);
+        auto flipX = i % 2 ? 1.0f : -1.0f;
+        if (i < 2) {
+            light->updateDirectional(
+                    DirectionalLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
+                                           1.0f, 0.09f, 0.232f, shininess), glm::vec3(flipX * 1.0f, -1.0f, 1.0f)),
+                    i);
+        } else {
+            light->updateDirectional(
+                    DirectionalLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
+                                           1.0f, 0.09f, 0.232f, shininess), glm::vec3(flipX * 1.0f, -1.0f, -1.0f)),
+                    i);
+        }
+
     }
     ImGui::End();
     graphics->end_gui();

@@ -81,7 +81,7 @@ void MainController::update_camera() {
             float eventEnd;
             if (platform->key(engine::platform::KeyId::KEY_LEFT_SHIFT)
                         .is_down()) {
-                camera->MovementSpeed = 7.0f;
+                camera->MovementSpeed = 50.0f;
                 eventEnd = platform->getGlfwTime();
                 eventController->notify(
                         Action(Actions::PRESS, actionEnd - actionStart, EventA::KEYBOARD, eventEnd - eventStart,
@@ -115,58 +115,86 @@ void MainController::update() {
     }
 }
 
-void MainController::drawBackpack() {
-    auto light = engine::core::Controller::get<LightController>();
+void MainController::drawTerrain() {
     auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
-    engine::resources::Model *backpack = resources->model("backpack");
+    engine::resources::Model *brown_mud = resources->model("brown_mud");
+    engine::resources::Shader *shader = resources->shader("terrain");
+    shader->use();
+    shader->set_mat4("projection", graphics->projection_matrix());
+    shader->set_mat4("view", graphics->camera()
+                                     ->view_matrix());
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    shader->set_mat4("model", model);
+    shader->set_mat3("normalModelMatrix", glm::mat3(glm::transpose(glm::inverse(model))));
+    shader->set_vec3("viewPos", graphics->camera()
+                                        ->Position);
+    auto light = engine::core::Controller::get<LightController>();
+    auto pointLights = light->getPointLights();
+    auto dirLights = light->getDirectionalLights();
+    light->setShaderPointLights(shader, "light", pointLights);
+    light->setShaderDirLights(shader, "dirLight", dirLights);
+    brown_mud->draw(shader);
+
+}
+
+void MainController::drawUFO() {
+    auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
+    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+    engine::resources::Model *ufo_obj = resources->model("UFO_obj");
+    engine::resources::Shader *shader = resources->shader("ufo");
+    shader->use();
+    shader->set_mat4("projection", graphics->projection_matrix());
+    shader->set_mat4("view", graphics->camera()
+                                     ->view_matrix());
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(0.0f, 35.0f, 0.0f));
+    model = glm::scale(model, glm::vec3(35.0f));
+    shader->set_mat4("model", model);
+    shader->set_mat3("normalModelMatrix", glm::mat3(glm::transpose(glm::inverse(model))));
+    shader->set_vec3("viewPos", graphics->camera()
+                                        ->Position);
+    auto light = engine::core::Controller::get<LightController>();
+    auto pointLights = light->getPointLights();
+    auto dirLights = light->getDirectionalLights();
+    light->setShaderPointLights(shader, "light", pointLights);
+    light->setShaderDirLights(shader, "dirLight", dirLights);
+    ufo_obj->draw(shader);
+
+}
+
+void MainController::drawAliens() {
+    auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
+    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+    engine::resources::Model *alien = resources->model("Argise_The_Green_Alien_OBJ");
     engine::resources::Shader *shader = resources->shader("basic");
     shader->use();
     shader->set_mat4("projection", graphics->projection_matrix());
     shader->set_mat4("view", graphics->camera()
                                      ->view_matrix());
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::translate(model, glm::vec3(80.0f, 1.0f, 0.0f));
+    model = glm::scale(model, glm::vec3(1.0f));
     shader->set_mat4("model", model);
     shader->set_mat3("normalModelMatrix", glm::mat3(glm::transpose(glm::inverse(model))));
     shader->set_vec3("viewPos", graphics->camera()
                                         ->Position);
+    auto light = engine::core::Controller::get<LightController>();
     auto pointLights = light->getPointLights();
     auto dirLights = light->getDirectionalLights();
     light->setShaderPointLights(shader, "light", pointLights);
     light->setShaderDirLights(shader, "dirLight", dirLights);
-    backpack->draw(shader);
-
+    alien->draw(shader);
 }
 
 void MainController::drawSkybox() {
     auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
-    auto skybox = resources->skybox("mountainSkybox");
+    auto skybox = resources->skybox("skybox220");
     auto shader = resources->shader("skybox");
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
     graphics->draw_skybox(shader, skybox);
-}
-
-void MainController::drawFloor() {
-    auto light = engine::core::Controller::get<LightController>();
-    auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
-    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
-    auto shader = resources->shader("textureShader");
-    shader->use();
-    shader->set_mat4("projection", graphics->projection_matrix());
-    shader->set_mat4("view", graphics->camera()
-                                     ->view_matrix());
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    model = glm::scale(model, glm::vec3(10.0f));
-    shader->set_mat4("model", model);
-    shader->set_mat3("normalModelMatrix", glm::mat3(glm::transpose(glm::inverse(model))));
-    shader->set_vec3("viewPos", graphics->camera()
-                                        ->Position);
-    auto dirLights = light->getDirectionalLights();
-    light->setShaderDirLights(shader, "dirLight", dirLights);
-    mesh->draw(shader);
 }
 
 void MainController::begin_draw() {
@@ -174,9 +202,10 @@ void MainController::begin_draw() {
 }
 
 void MainController::draw() {
-    drawBackpack();
+    drawTerrain();
     drawSkybox();
-    drawFloor();
+    drawUFO();
+//    drawAliens();
 }
 
 void MainController::end_draw() {
@@ -186,6 +215,5 @@ void MainController::end_draw() {
 std::string_view MainController::name() const {
     return "app::MainController";
 }
-
 
 }

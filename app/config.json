@@ -1,8 +1,11 @@
 {
   "resources": {
     "models": {
-      "backpack": {
-        "path": "backpack/backpack.obj"
+      "brown_mud": {
+        "path": "brown_mud/brown_mud.obj"
+      },
+      "UFO_obj": {
+        "path": "UFO_obj/UFO.obj"
       }
     }
   },

@@ -30,11 +30,13 @@ private:
 
     void end_draw() override;
 
-    void drawBackpack();
+    void drawTerrain();
 
     void drawSkybox();
 
-    void drawFloor();
+    void drawUFO();
+
+    void drawAliens();
 
     std::string_view name() const override;
 
