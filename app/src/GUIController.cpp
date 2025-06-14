@@ -4,12 +4,6 @@
 
 namespace app {
 
-static glm::vec3 lightColor(1.0f);
-static glm::vec3 ambientStrength(12.0f, 2.0f, 122.0f), diffuseStrength(11.0f, 12.0f, 122.f), specularStrength(332.0f,
-                                                                                                              122.0f,
-                                                                                                              123.0f);
-static float shininess = 1.0f;
-
 void GUIController::initialize() {
     set_enable(false);
 }
@@ -77,7 +71,10 @@ void GUIController::draw() {
                                            1.0f, 0.09f, 0.232f, shininess), glm::vec3(flipX * 1.0f, -1.0f, -1.0f)),
                     i);
         }
-
+        for (size_t i = 0; i < NR_SPOT_LIGHTS; i++) {
+            light->updateSpot(SpotLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
+                                                    1.0f, 0.09f, 0.232f, shininess), glm::vec3(0.0f, 50.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), 12.5f, 17.5f), i);
+        }
     }
     ImGui::End();
     graphics->end_gui();

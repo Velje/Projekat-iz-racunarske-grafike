@@ -53,11 +53,28 @@ struct DirLight {
     bool enabled;
 };
 
+struct SpotLight {
+    vec3 position;
+    vec3 direction;
+    vec3 color;
+    vec3 ambientStrength;
+    vec3 diffuseStrength;
+    vec3 specularStrength;
+    float constant;
+    float linear;
+    float quadratic;
+    float shininess;
+    float outcutOff;
+    float cutOff;
+    bool enabled;
+};
+
 #define NR_POINT_LIGHTS 8
 #define NR_DIR_LIGHTS 4
-
+#define NR_SPOT_LIGHTS 1
 uniform PointLight light[NR_POINT_LIGHTS];
 uniform DirLight dirLight[NR_DIR_LIGHTS];
+uniform SpotLight spotLight[NR_SPOT_LIGHTS];
 
 uniform vec3 viewPos;
 uniform sampler2D texture_normal1;
@@ -98,6 +115,21 @@ void main() {
             vec3 specular = dirLight[i].specularStrength * calculateSpecular(lightDir, reflectDir, dirLight[i].shininess) * dirLight[i].color * modelSpecular;
             float distance = length(FragPos + dirLight[i].direction);
             result += (ambient + diffuse + specular) / (dirLight[i].constant + dirLight[i].linear * distance + dirLight[i].quadratic * distance * distance);
+        }
+    }
+    for (uint i = 0; i < NR_SPOT_LIGHTS; i++) {
+        if (spotLight[i].enabled) {
+            vec3 lightDir = normalize(spotLight[i].position - FragPos);
+            float theta = dot(lightDir, normalize(-spotLight[i].direction));
+            float epsilon = spotLight[i].cutOff - spotLight[i].outcutOff;
+            float intensity = clamp((theta - spotLight[i].outcutOff) / epsilon, 0.0f, 1.0f);
+            vec3 viewDir = normalize(viewPos - FragPos);
+            vec3 reflectDir = reflect(-lightDir, modelNormal);
+            vec3 ambient = spotLight[i].ambientStrength * spotLight[i].color * modelDiffuse;
+            vec3 diffuse = intensity * spotLight[i].diffuseStrength * calculateDiffuse(modelDiffuse, lightDir) * spotLight[i].color * modelDiffuse;
+            vec3 specular = intensity * spotLight[i].specularStrength * calculateSpecular(viewDir, reflectDir, spotLight[i].shininess) * spotLight[i].color * modelSpecular;
+            float distance = length(spotLight[i].position - FragPos);
+            result += (ambient + diffuse + specular) / (spotLight[i].constant + spotLight[i].linear * distance + spotLight[i].quadratic * distance * distance);
         }
     }
     result = min(result, vec3(1.0f));

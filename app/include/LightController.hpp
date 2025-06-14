@@ -8,6 +8,10 @@
 
 namespace app {
 
+static glm::vec3 lightColor(1.0f);
+static glm::vec3 ambientStrength(12.0f, 2.0f, 122.0f), diffuseStrength(11.0f, 12.0f, 122.f), specularStrength(332.0f);
+static float shininess = 1.0f;
+
 class Light {
 public:
     glm::vec3 color;
@@ -33,6 +37,7 @@ public:
 
 class SpotLight : public Light {
 public:
+    glm::vec3 position;
     glm::vec3 direction;
     float cutOff;
     float outerCutOff;
@@ -40,7 +45,7 @@ public:
 
 const static size_t NR_POINT_LIGHTS = 8;
 const static size_t NR_DIR_LIGHTS = 4;
-const static size_t NR_SPOT_LIGHTS = 2;
+const static size_t NR_SPOT_LIGHTS = 1;
 
 class LightController : public engine::core::Controller {
 public:

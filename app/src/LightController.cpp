@@ -8,6 +8,33 @@ static std::array<DirectionalLight, NR_DIR_LIGHTS> directionalLights;
 static std::array<SpotLight, NR_SPOT_LIGHTS> spotLights;
 
 void LightController::initialize() {
+    for (size_t i = 0; i < NR_POINT_LIGHTS; i++) {
+        updatePoint(
+                PointLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
+                                 1.0f, 0.09f, 0.232f, shininess),
+                           glm::vec3(sin(2 * i * M_PI / NR_POINT_LIGHTS) * 80.0f, 4.0f,
+                                     cos(2 * i * M_PI / NR_POINT_LIGHTS) * 80.0f)),
+                i);
+    }
+    for (size_t i = 0; i < NR_DIR_LIGHTS; i++) {
+        auto flipX = i % 2 ? 1.0f : -1.0f;
+        if (i < 2) {
+            updateDirectional(
+                    DirectionalLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
+                                           1.0f, 0.09f, 0.232f, shininess), glm::vec3(flipX * 1.0f, -1.0f, 1.0f)),
+                    i);
+        } else {
+            updateDirectional(
+                    DirectionalLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
+                                           1.0f, 0.09f, 0.232f, shininess), glm::vec3(flipX * 1.0f, -1.0f, -1.0f)),
+                    i);
+        }
+
+    }
+    for (uint32_t i = 0; i < NR_SPOT_LIGHTS; i++) {
+        updateSpot(SpotLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
+                                          1.0f, 0.09f, 0.232f, shininess), glm::vec3(0.0f, 50.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), 12.5f, 17.5f), i);
+    }
 }
 
 void LightController::poll_events() {
@@ -95,6 +122,7 @@ void LightController::setShaderDirLights(engine::resources::Shader *shader, cons
 void LightController::setShaderSpotLights(engine::resources::Shader *shader, const std::string &name,
                                           std::array<SpotLight, NR_SPOT_LIGHTS> &lights) {
     for (size_t i = 0; i < NR_SPOT_LIGHTS; i++) {
+        shader->set_vec3(name + "[" + std::to_string(i) + "].position", lights[i].position);
         shader->set_vec3(name + "[" + std::to_string(i) + "].direction", lights[i].direction);
         shader->set_vec3(name + "[" + std::to_string(i) + "].color", lights[i].color);
         shader->set_vec3(name + "[" + std::to_string(i) + "].ambientStrength", lights[i].ambientStrength);
@@ -105,7 +133,7 @@ void LightController::setShaderSpotLights(engine::resources::Shader *shader, con
         shader->set_float(name + "[" + std::to_string(i) + "].quadratic", lights[i].quadratic);
         shader->set_float(name + "[" + std::to_string(i) + "].shininess", lights[i].shininess);
         shader->set_float(name + "[" + std::to_string(i) + "].cutOff", lights[i].cutOff);
-        shader->set_float(name + "[" + std::to_string(i) + "].outerCutOff", lights[i].outerCutOff);
+        shader->set_float(name + "[" + std::to_string(i) + "].outcutOff", lights[i].outerCutOff);
         shader->set_bool(name + "[" + std::to_string(i) + "].enabled", lights[i].enabled);
     }
 }

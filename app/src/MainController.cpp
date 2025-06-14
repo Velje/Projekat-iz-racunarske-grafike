@@ -12,11 +12,6 @@ const std::unordered_map<engine::platform::KeyId, engine::graphics::Camera::Move
     return KeyIdToCameraMovement;
 }
 
-static std::vector<engine::resources::Vertex> vertices;
-static std::vector<uint32_t> indices;
-static std::vector<engine::resources::Texture *> textures;
-static std::unique_ptr<engine::resources::Mesh> mesh;
-
 void initialize_keyid_maps();
 
 void MainController::initialize() {
@@ -25,24 +20,6 @@ void MainController::initialize() {
     platform->register_platform_event_observer(std::make_unique<MainPlatformEventObserver>());
     KeyIdToCameraMovement.rehash(engine::graphics::Camera::Movement::MOVEMENT_COUNT);
     initialize_keyid_maps();
-    vertices = {
-            engine::resources::Vertex(glm::vec3(0.5f, 0.5f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f),
-                                      glm::vec2(1.0f, 1.0f)),  // top right
-            engine::resources::Vertex(glm::vec3(0.5f, -0.5f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f),
-                                      glm::vec2(1.0f, 0.0f)), // bottom right
-            engine::resources::Vertex(glm::vec3(-0.5f, -0.5f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f),
-                                      glm::vec2(0.0f, 0.0f)),  // bottom left
-            engine::resources::Vertex(glm::vec3(-0.5f, 0.5f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f),
-                                      glm::vec2(0.0f, 1.0f)
-            )  // top left
-    };
-    indices = {  // note that we start from 0!
-            0, 1, 3,   // first triangle
-            1, 2, 3    // second triangle
-    };
-    auto texture0 = resources->texture("wall", "", engine::resources::TextureType::Diffuse, true);
-    textures = {texture0};
-    mesh = std::make_unique<engine::resources::Mesh>(vertices, indices, textures);
     engine::graphics::OpenGL::enable_depth_testing();
     engine::graphics::OpenGL::enable_antialiasing();
 }
@@ -134,10 +111,11 @@ void MainController::drawTerrain() {
     auto light = engine::core::Controller::get<LightController>();
     auto pointLights = light->getPointLights();
     auto dirLights = light->getDirectionalLights();
+    auto spotLights = light->getSpotLights();
     light->setShaderPointLights(shader, "light", pointLights);
     light->setShaderDirLights(shader, "dirLight", dirLights);
+    light->setShaderSpotLights(shader, "spotLight", spotLights);
     brown_mud->draw(shader);
-
 }
 
 void MainController::drawUFO() {
@@ -150,7 +128,7 @@ void MainController::drawUFO() {
     shader->set_mat4("view", graphics->camera()
                                      ->view_matrix());
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 35.0f, 0.0f));
+    model = glm::translate(model, glm::vec3(0.0f, 50.0f, 0.0f));
     model = glm::scale(model, glm::vec3(35.0f));
     shader->set_mat4("model", model);
     shader->set_mat3("normalModelMatrix", glm::mat3(glm::transpose(glm::inverse(model))));
@@ -159,8 +137,10 @@ void MainController::drawUFO() {
     auto light = engine::core::Controller::get<LightController>();
     auto pointLights = light->getPointLights();
     auto dirLights = light->getDirectionalLights();
+    auto spotLights = light->getSpotLights();
     light->setShaderPointLights(shader, "light", pointLights);
     light->setShaderDirLights(shader, "dirLight", dirLights);
+    light->setShaderSpotLights(shader, "spotLight", spotLights);
     ufo_obj->draw(shader);
 
 }
