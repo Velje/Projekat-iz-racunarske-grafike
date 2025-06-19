@@ -24,7 +24,7 @@ void Model::prepareInstancing(std::vector<glm::mat4>& modelMatrices, size_t coun
     glBufferData(GL_ARRAY_BUFFER, count * sizeof(glm::mat4),
                  &modelMatrices[0], GL_STATIC_DRAW);
     for (auto& mesh : m_meshes) {
-        mesh.prepareMesh(modelMatrices, count);
+        mesh.prepareMesh();
     }
 }
 

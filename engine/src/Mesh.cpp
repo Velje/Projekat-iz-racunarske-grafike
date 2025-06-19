@@ -67,7 +67,7 @@ void Mesh::destroy() {
     glDeleteVertexArrays(1, &m_vao);
 }
 
-void Mesh::prepareMesh(std::vector<glm::mat4> &modelMatrices, size_t count) {
+void Mesh::prepareMesh() {
     glBindVertexArray(m_vao);
     std::size_t v4s = sizeof(glm::vec4);
     glEnableVertexAttribArray(3);

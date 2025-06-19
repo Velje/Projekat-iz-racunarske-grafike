@@ -55,7 +55,7 @@ public:
          std::vector<Texture *> textures);
 
     void drawInstance(Shader*& shader, size_t count);
-    void prepareMesh(std::vector<glm::mat4>& modelMatrices, size_t count);
+    void prepareMesh();
 
 private:
 
