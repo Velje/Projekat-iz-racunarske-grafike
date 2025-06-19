@@ -67,16 +67,41 @@ void Mesh::destroy() {
     glDeleteVertexArrays(1, &m_vao);
 }
 
-const uint32_t& Mesh::getVAO() {
-    return m_vao;
+void Mesh::prepareMesh(std::vector<glm::mat4> &modelMatrices, size_t count) {
+    glBindVertexArray(m_vao);
+    std::size_t v4s = sizeof(glm::vec4);
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4*v4s, (void*)0);
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4*v4s, (void*)(1*v4s));
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4*v4s, (void*)(2*v4s));
+    glEnableVertexAttribArray(6);
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4*v4s, (void*)(3*v4s));
+    glVertexAttribDivisor(3, 1);
+    glVertexAttribDivisor(4, 1);
+    glVertexAttribDivisor(5, 1);
+    glVertexAttribDivisor(6, 1);
+    glBindVertexArray(0);
 }
 
-const uint32_t& Mesh::getNumIndices() {
-    return m_num_indices;
-}
-
-const std::vector<Texture *> &Mesh::getTextures() {
-    return m_textures;
+void Mesh::drawInstance(Shader *&shader, size_t count) {
+    std::unordered_map<std::string_view, uint32_t> counts;
+    std::string uniform_name;
+    uniform_name.reserve(32);
+    for (int i = 0; i < m_textures.size(); i++) {
+        glActiveTexture(GL_TEXTURE0 + i);
+        const auto &texture_type = Texture::uniform_name_convention(m_textures[i]->type());
+        uniform_name.append(texture_type);
+        const auto count = (counts[texture_type] += 1);
+        uniform_name.append(std::to_string(count));
+        shader->set_int(uniform_name, i);
+        glBindTexture(GL_TEXTURE_2D, m_textures[i]->id());
+        uniform_name.clear();
+    }
+    glBindVertexArray(m_vao);
+    glDrawElementsInstanced(GL_TRIANGLES,
+                            m_num_indices, GL_UNSIGNED_INT, 0, count);
 }
 
 }
