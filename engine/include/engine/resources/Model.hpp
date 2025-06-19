@@ -36,7 +36,7 @@ public:
     * @param shader Adequate shader relative to preparation.
     * @param count Number of model draws that we have prepared for.
     */
-    void drawInstances(const Shader* shader, size_t count);
+    void drawInstances(Shader*& shader, size_t count);
 
     /**
     * @brief Destroys the model in the OpenGL context.

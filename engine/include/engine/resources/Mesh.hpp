@@ -54,9 +54,8 @@ public:
     Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices,
          std::vector<Texture *> textures);
 
-    const uint32_t& getVAO();
-    const uint32_t& getNumIndices();
-    const std::vector<Texture *>& getTextures();
+    void drawInstance(Shader*& shader, size_t count);
+    void prepareMesh();
 
 private:
 
