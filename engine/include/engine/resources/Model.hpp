@@ -27,10 +27,15 @@ public:
 
     /**
     * @brief Use when drawing a lot of models at once.
-    * @param meshes Meshes of the model to prepare for instanced drawing.
+    * @param modelMatrices Model matrix for each instance.
     * @param count Number of model draws to prepare for.
     */
     void prepareInstancing(std::vector<glm::mat4>& modelMatrices, size_t count);
+    /**
+    * @brief Use after instancing preparation.
+    * @param shader Adequate shader relative to preparation.
+    * @param count Number of model draws that we have prepared for.
+    */
     void drawInstances(const Shader* shader, size_t count);
 
     /**
