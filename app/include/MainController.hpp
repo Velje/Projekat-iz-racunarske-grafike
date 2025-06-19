@@ -36,8 +36,6 @@ private:
 
     void drawUFO();
 
-    void drawAliens();
-
     std::string_view name() const override;
 
 };

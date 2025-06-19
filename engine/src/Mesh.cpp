@@ -67,4 +67,16 @@ void Mesh::destroy() {
     glDeleteVertexArrays(1, &m_vao);
 }
 
+const uint32_t& Mesh::getVAO() {
+    return m_vao;
+}
+
+const uint32_t& Mesh::getNumIndices() {
+    return m_num_indices;
+}
+
+const std::vector<Texture *> &Mesh::getTextures() {
+    return m_textures;
+}
+
 }

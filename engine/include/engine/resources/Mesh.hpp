@@ -54,6 +54,10 @@ public:
     Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices,
          std::vector<Texture *> textures);
 
+    const uint32_t& getVAO();
+    const uint32_t& getNumIndices();
+    const std::vector<Texture *>& getTextures();
+
 private:
 
     uint32_t m_vao{0};

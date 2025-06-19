@@ -7,7 +7,7 @@
 namespace app {
 
 static std::unordered_map<engine::platform::KeyId, engine::graphics::Camera::Movement> KeyIdToCameraMovement;
-
+static std::vector <glm::mat4> modelMatrices;
 const std::unordered_map<engine::platform::KeyId, engine::graphics::Camera::Movement> &MainController::getKeyIdToCameraMovement() {
     return KeyIdToCameraMovement;
 }
@@ -21,7 +21,15 @@ void MainController::initialize() {
     KeyIdToCameraMovement.rehash(engine::graphics::Camera::Movement::MOVEMENT_COUNT);
     initialize_keyid_maps();
     engine::graphics::OpenGL::enable_depth_testing();
-    engine::graphics::OpenGL::enable_antialiasing();
+//    engine::graphics::OpenGL::enable_antialiasing();
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::scale(model, glm::vec3(5.0f));
+    for (uint32_t i = 0; i < 10; i++) {
+        modelMatrices.push_back(glm::translate(model, glm::vec3(2 * (i + 1), 8.0f, 2 * (i + 1))));
+    }
+    for (uint32_t i = 0; i < 10; i++) {
+        modelMatrices.push_back(glm::translate(model, glm::vec3(0, 2 * (i + 1), 0)));
+    }
 }
 
 void initialize_keyid_maps() {
@@ -128,12 +136,11 @@ void MainController::drawUFO() {
     shader->set_mat4("view", graphics->camera()
                                      ->view_matrix());
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 50.0f, 0.0f));
-    model = glm::scale(model, glm::vec3(35.0f));
-    shader->set_mat4("model", model);
+    model = glm::scale(model, glm::vec3(5.0f));
     shader->set_mat3("normalModelMatrix", glm::mat3(glm::transpose(glm::inverse(model))));
     shader->set_vec3("viewPos", graphics->camera()
                                         ->Position);
+    ufo_obj->prepareInstancing(modelMatrices, 20);
     auto light = engine::core::Controller::get<LightController>();
     auto pointLights = light->getPointLights();
     auto dirLights = light->getDirectionalLights();
@@ -141,32 +148,8 @@ void MainController::drawUFO() {
     light->setShaderPointLights(shader, "light", pointLights);
     light->setShaderDirLights(shader, "dirLight", dirLights);
     light->setShaderSpotLights(shader, "spotLight", spotLights);
-    ufo_obj->draw(shader);
+    ufo_obj->drawInstances(shader, 20);
 
-}
-
-void MainController::drawAliens() {
-    auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
-    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
-    engine::resources::Model *alien = resources->model("Argise_The_Green_Alien_OBJ");
-    engine::resources::Shader *shader = resources->shader("basic");
-    shader->use();
-    shader->set_mat4("projection", graphics->projection_matrix());
-    shader->set_mat4("view", graphics->camera()
-                                     ->view_matrix());
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(80.0f, 1.0f, 0.0f));
-    model = glm::scale(model, glm::vec3(1.0f));
-    shader->set_mat4("model", model);
-    shader->set_mat3("normalModelMatrix", glm::mat3(glm::transpose(glm::inverse(model))));
-    shader->set_vec3("viewPos", graphics->camera()
-                                        ->Position);
-    auto light = engine::core::Controller::get<LightController>();
-    auto pointLights = light->getPointLights();
-    auto dirLights = light->getDirectionalLights();
-    light->setShaderPointLights(shader, "light", pointLights);
-    light->setShaderDirLights(shader, "dirLight", dirLights);
-    alien->draw(shader);
 }
 
 void MainController::drawSkybox() {

@@ -85,5 +85,3 @@ std::string_view GUIController::name() const {
 }
 
 }
-
-

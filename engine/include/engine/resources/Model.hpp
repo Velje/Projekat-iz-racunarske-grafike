@@ -26,6 +26,14 @@ public:
     void draw(const Shader *shader);
 
     /**
+    * @brief Use when drawing a lot of models at once.
+    * @param meshes Meshes of the model to prepare for instanced drawing.
+    * @param count Number of model draws to prepare for.
+    */
+    void prepareInstancing(std::vector<glm::mat4>& modelMatrices, size_t count);
+    void drawInstances(const Shader* shader, size_t count);
+
+    /**
     * @brief Destroys the model in the OpenGL context.
     */
     void destroy();
@@ -81,6 +89,7 @@ private:
                               , m_path(std::move(path))
                               , m_name(std::move(name)) {
     }
+
 };
 } // namespace engine
 
