@@ -11,10 +11,12 @@ out vec3 FragPos;
 
 uniform mat4 view;
 uniform mat4 projection;
+
+uniform mat4 model;
 uniform mat3 normalModelMatrix;
 
 void main() {
-    FragPos = vec3(vec4(aPos, 1.0));
+    FragPos = vec3(model * vec4(aPos, 1.0));
     Normal = normalModelMatrix * aNormal;
     TexCoords = aTexCoords;
     gl_Position = projection * view * instanceMatrix * vec4(FragPos, 1.0);
@@ -23,116 +25,22 @@ void main() {
 //#shader fragment
 #version 460 core
 
+layout (location = 0) out vec3 gPosition;
+layout (location = 1) out vec3 gNormal;
+layout (location = 2) out vec4 gAlbedoSpec;
+
 out vec4 FragColor;
 in vec3 FragPos;
 in vec2 TexCoords;
 in vec3 Normal;
 
-struct PointLight {
-    vec3 position;
-    vec3 color;
-    vec3 ambientStrength;
-    vec3 diffuseStrength;
-    vec3 specularStrength;
-    float constant;
-    float linear;
-    float quadratic;
-    float shininess;
-    bool enabled;
-};
-struct DirLight {
-    vec3 direction;
-    vec3 color;
-    vec3 ambientStrength;
-    vec3 diffuseStrength;
-    vec3 specularStrength;
-    float constant;
-    float linear;
-    float quadratic;
-    float shininess;
-    bool enabled;
-};
-
-struct SpotLight {
-    vec3 position;
-    vec3 direction;
-    vec3 color;
-    vec3 ambientStrength;
-    vec3 diffuseStrength;
-    vec3 specularStrength;
-    float constant;
-    float linear;
-    float quadratic;
-    float shininess;
-    float outcutOff;
-    float cutOff;
-    bool enabled;
-};
-
-#define NR_POINT_LIGHTS 8
-#define NR_DIR_LIGHTS 4
-#define NR_SPOT_LIGHTS 1
-uniform PointLight light[NR_POINT_LIGHTS];
-uniform DirLight dirLight[NR_DIR_LIGHTS];
-uniform SpotLight spotLight[NR_SPOT_LIGHTS];
-
-uniform vec3 viewPos;
-uniform sampler2D texture_normal1;
 uniform sampler2D texture_diffuse1;
+uniform sampler2D texture_normal1;
 uniform sampler2D texture_specular1;
 
-float calculateDiffuse(vec3 modelNormal, vec3 lightDir) {
-    return max(dot(modelNormal, lightDir), 0.0f);
-}
-
-float calculateSpecular(vec3 viewDir, vec3 reflectDir, float shininess) {
-    return pow(max(dot(viewDir, reflectDir), 0.0f), shininess);
-}
-
 void main() {
-    vec3 viewDir = normalize(viewPos - FragPos);
-    vec3 modelNormal = normalize(texture(texture_normal1, TexCoords).rgb * 2.0f - 1.0f + Normal);
-    vec3 modelDiffuse = texture(texture_diffuse1, TexCoords).rgb;
-    float modelSpecular = texture(texture_specular1, TexCoords).r;
-    vec3 result = vec3(0.0f);
-    for (uint i = 0; i < NR_POINT_LIGHTS; i++) {
-        if (light[i].enabled) {
-            vec3 lightDir = normalize(light[i].position - FragPos);
-            vec3 reflectDir = reflect(-lightDir, modelNormal);
-            vec3 ambient = light[i].ambientStrength * light[i].color * modelDiffuse;
-            vec3 diffuse = light[i].diffuseStrength * calculateDiffuse(modelNormal, lightDir) * light[i].color * modelDiffuse;
-            vec3 specular = light[i].specularStrength * calculateSpecular(viewDir, reflectDir, light[i].shininess) * light[i].color * modelSpecular;
-            float distance = length(light[i].position - FragPos);
-            result += (ambient + diffuse + specular) / (light[i].constant + light[i].linear * distance + light[i].quadratic * distance * distance);
-        }
-    }
-    for (uint i = 0; i < NR_DIR_LIGHTS; i++) {
-        if (dirLight[i].enabled) {
-            vec3 lightDir = normalize(dirLight[i].direction);
-            vec3 reflectDir = reflect(lightDir, modelNormal);
-            vec3 ambient = dirLight[i].ambientStrength * dirLight[i].color * modelDiffuse;
-            vec3 diffuse = dirLight[i].diffuseStrength * calculateDiffuse(modelDiffuse, lightDir) * dirLight[i].color * modelDiffuse;
-            vec3 specular = dirLight[i].specularStrength * calculateSpecular(lightDir, reflectDir, dirLight[i].shininess) * dirLight[i].color * modelSpecular;
-            float distance = length(FragPos + dirLight[i].direction);
-            result += (ambient + diffuse + specular) / (dirLight[i].constant + dirLight[i].linear * distance + dirLight[i].quadratic * distance * distance);
-        }
-    }
-    for (uint i = 0; i < NR_SPOT_LIGHTS; i++) {
-        if (spotLight[i].enabled) {
-            vec3 lightDir = normalize(spotLight[i].position - FragPos);
-            float theta = dot(lightDir, normalize(-spotLight[i].direction));
-            float epsilon = spotLight[i].cutOff - spotLight[i].outcutOff;
-            float intensity = clamp((theta - spotLight[i].outcutOff) / epsilon, 0.0f, 1.0f);
-            vec3 viewDir = normalize(viewPos - FragPos);
-            vec3 reflectDir = reflect(-lightDir, modelNormal);
-            vec3 ambient = spotLight[i].ambientStrength * spotLight[i].color * modelDiffuse;
-            vec3 diffuse = intensity * spotLight[i].diffuseStrength * calculateDiffuse(modelDiffuse, lightDir) * spotLight[i].color * modelDiffuse;
-            vec3 specular = intensity * spotLight[i].specularStrength * calculateSpecular(viewDir, reflectDir, spotLight[i].shininess) * spotLight[i].color * modelSpecular;
-            float distance = length(spotLight[i].position - FragPos);
-            result += (ambient + diffuse + specular) / (spotLight[i].constant + spotLight[i].linear * distance + spotLight[i].quadratic * distance * distance);
-        }
-    }
-    result = min(result, vec3(1.0f));
-    FragColor = vec4(modelDiffuse, 1.0);
-
+    gPosition = FragPos.xyz;
+    gNormal = normalize(texture(texture_normal1, TexCoords).rgb * 2.0f - 1.0f + Normal);
+    gAlbedoSpec.rgb = texture(texture_diffuse1, TexCoords).rgb;
+    gAlbedoSpec.a = texture(texture_specular1, TexCoords).r;
 }

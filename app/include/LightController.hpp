@@ -8,8 +8,8 @@
 
 namespace app {
 
-static glm::vec3 lightColor(1.0f);
-static glm::vec3 ambientStrength(12.0f, 2.0f, 122.0f), diffuseStrength(11.0f, 12.0f, 122.f), specularStrength(332.0f);
+static glm::vec3 lightColor(60.0f/255, 10.0f/255, 10.0f/255);
+static glm::vec3 ambientStrength(12.0f, 2.0f, 122.0f), diffuseStrength(11.0f, 12.0f, 122.f), specularStrength(0.0f);
 static float shininess = 1.0f;
 
 class Light {

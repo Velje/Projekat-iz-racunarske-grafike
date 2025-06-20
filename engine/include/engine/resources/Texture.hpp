@@ -17,12 +17,11 @@ class Shader;
 * @enum TextureType used by the Model class to identify the type of the texture and bind it to the correct uniform sampler.
 */
 enum class TextureType {
-    Regular,
     Diffuse,
     Specular,
     Normal,
     Height,
-    AO
+    Regular,
 };
 
 /**

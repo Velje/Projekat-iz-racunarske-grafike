@@ -145,6 +145,17 @@ public:
 
     static void enable_antialiasing();
 
+    static std::array<uint32_t, 3> generateGbuffer(uint32_t& gBuffer, uint32_t& rboDepth, std::array <uint32_t, 3>& attachments,
+                                                                     uint32_t SCR_WIDTH, uint32_t SCR_HEIGHT);
+
+    static void activateGbuffertextures(std::array<uint32_t, 3>& textureIDs);
+
+    static void bindFrameBuffer(uint32_t buffer);
+
+    static void writeToDefaultFramebuffer(uint32_t& buffer, uint32_t SCR_WIDTH, uint32_t SCR_HEIGHT);
+
+    static void renderScreen();
+
 private:
     /**
     * @brief Throws an engine::util::EngineError of type @ref engine::util::EngineError::Type::OpenGLError if an OpenGL error occurred. Used internally.

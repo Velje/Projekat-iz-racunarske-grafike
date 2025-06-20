@@ -11,25 +11,34 @@ static std::vector <glm::mat4> modelMatrices;
 const std::unordered_map<engine::platform::KeyId, engine::graphics::Camera::Movement> &MainController::getKeyIdToCameraMovement() {
     return KeyIdToCameraMovement;
 }
+static uint32_t gBuffer, rboDepth;
+static std::array <uint32_t, 3> attachments, textureIDs;
 
 void initialize_keyid_maps();
 
 void MainController::initialize() {
+    auto window = engine::core::Controller::get<engine::platform::PlatformController>()->window();
     auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     platform->register_platform_event_observer(std::make_unique<MainPlatformEventObserver>());
     KeyIdToCameraMovement.rehash(engine::graphics::Camera::Movement::MOVEMENT_COUNT);
     initialize_keyid_maps();
     engine::graphics::OpenGL::enable_depth_testing();
+    textureIDs = engine::graphics::OpenGL::generateGbuffer(gBuffer, rboDepth, attachments, window->width(), window->height());
 //    engine::graphics::OpenGL::enable_antialiasing();
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::scale(model, glm::vec3(5.0f));
-    for (uint32_t i = 0; i < 10; i++) {
-        modelMatrices.push_back(glm::translate(model, glm::vec3(2 * (i + 1), 8.0f, 2 * (i + 1))));
-    }
-    for (uint32_t i = 0; i < 10; i++) {
-        modelMatrices.push_back(glm::translate(model, glm::vec3(0, 2 * (i + 1), 0)));
-    }
+    modelMatrices.push_back(model);
+    modelMatrices.push_back(glm::translate(model, glm::vec3(0.0f, 30.0f, 0.0f)));
+    modelMatrices.push_back(glm::translate(model, glm::vec3(30.0f, 0.0f, 0.0f)));
+    modelMatrices.push_back(glm::translate(model, glm::vec3(0.0f,  0.0f, -30.0f)));
+    modelMatrices.push_back(glm::translate(model, glm::vec3(0.0f, 0.0f, 30.0f)));
+//    for (uint32_t i = 0; i < 10; i++) {
+//        modelMatrices.push_back(glm::translate(model, glm::vec3(2 * (i + 1), 8.0f, 2 * (i + 1))));
+//    }
+//    for (uint32_t i = 0; i < 10; i++) {
+//        modelMatrices.push_back(glm::translate(model, glm::vec3(0, 2 * (i + 1), 0)));
+//    }
 }
 
 void initialize_keyid_maps() {
@@ -105,25 +114,37 @@ void MainController::drawTerrain() {
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
     engine::resources::Model *brown_mud = resources->model("brown_mud");
     engine::resources::Shader *shader = resources->shader("terrain");
+    engine::resources::Shader *lightShader = resources->shader("lightPass");
+
+    engine::graphics::OpenGL::bindFrameBuffer(gBuffer);
+    engine::graphics::OpenGL::clear_buffers();
     shader->use();
     shader->set_mat4("projection", graphics->projection_matrix());
     shader->set_mat4("view", graphics->camera()
-                                     ->view_matrix());
+            ->view_matrix());
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
     model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     shader->set_mat4("model", model);
     shader->set_mat3("normalModelMatrix", glm::mat3(glm::transpose(glm::inverse(model))));
-    shader->set_vec3("viewPos", graphics->camera()
-                                        ->Position);
+    brown_mud->draw(shader);
+    engine::graphics::OpenGL::bindFrameBuffer(0);
+
+    lightShader->use();
+    engine::graphics::OpenGL::activateGbuffertextures(textureIDs);
+    lightShader->set_int("gPosition", 0);
+    lightShader->set_int("gNormal", 1);
+    lightShader->set_int("gAlbedoSpec", 2);
+    lightShader->set_vec3("viewPos", graphics->camera()->Position);
     auto light = engine::core::Controller::get<LightController>();
     auto pointLights = light->getPointLights();
     auto dirLights = light->getDirectionalLights();
     auto spotLights = light->getSpotLights();
-    light->setShaderPointLights(shader, "light", pointLights);
-    light->setShaderDirLights(shader, "dirLight", dirLights);
-    light->setShaderSpotLights(shader, "spotLight", spotLights);
-    brown_mud->draw(shader);
+    light->setShaderPointLights(lightShader, "light", pointLights);
+    light->setShaderDirLights(lightShader, "dirLight", dirLights);
+    light->setShaderSpotLights(lightShader, "spotLight", spotLights);
+    engine::graphics::OpenGL::renderScreen();
+
 }
 
 void MainController::drawUFO() {
@@ -131,24 +152,35 @@ void MainController::drawUFO() {
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
     engine::resources::Model *ufo_obj = resources->model("UFO_obj");
     engine::resources::Shader *shader = resources->shader("ufo");
+    engine::resources::Shader *lightShader = resources->shader("lightPass");
+    engine::graphics::OpenGL::bindFrameBuffer(gBuffer);
+    engine::graphics::OpenGL::clear_buffers();
     shader->use();
     shader->set_mat4("projection", graphics->projection_matrix());
     shader->set_mat4("view", graphics->camera()
                                      ->view_matrix());
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::scale(model, glm::vec3(5.0f));
+    shader->set_mat4("model", model);
     shader->set_mat3("normalModelMatrix", glm::mat3(glm::transpose(glm::inverse(model))));
-    shader->set_vec3("viewPos", graphics->camera()
-                                        ->Position);
-    ufo_obj->prepareInstancing(modelMatrices, 20);
+    ufo_obj->prepareInstancing(modelMatrices, 5);
+    ufo_obj->drawInstances(shader, 5);
+    engine::graphics::OpenGL::bindFrameBuffer(0);
+
+    lightShader->use();
+    lightShader->set_int("gPosition", 0);
+    lightShader->set_int("gNormal", 1);
+    lightShader->set_int("gAlbedoSpec", 2);
+    lightShader->set_vec3("viewPos", graphics->camera()->Position);
+    engine::graphics::OpenGL::activateGbuffertextures(textureIDs);
     auto light = engine::core::Controller::get<LightController>();
     auto pointLights = light->getPointLights();
     auto dirLights = light->getDirectionalLights();
     auto spotLights = light->getSpotLights();
-    light->setShaderPointLights(shader, "light", pointLights);
-    light->setShaderDirLights(shader, "dirLight", dirLights);
-    light->setShaderSpotLights(shader, "spotLight", spotLights);
-    ufo_obj->drawInstances(shader, 20);
+    light->setShaderPointLights(lightShader, "light", pointLights);
+    light->setShaderDirLights(lightShader, "dirLight", dirLights);
+    light->setShaderSpotLights(lightShader, "spotLight", spotLights);
+    engine::graphics::OpenGL::renderScreen();
 
 }
 
@@ -165,8 +197,8 @@ void MainController::begin_draw() {
 }
 
 void MainController::draw() {
-    drawTerrain();
-    drawSkybox();
+//    drawTerrain();
+//    drawSkybox();
     drawUFO();
 //    drawAliens();
 }
