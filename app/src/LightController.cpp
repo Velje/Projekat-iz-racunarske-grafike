@@ -21,19 +21,22 @@ void LightController::initialize() {
         if (i < 2) {
             updateDirectional(
                     DirectionalLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
-                                           1.0f, 0.09f, 0.232f, shininess), glm::vec3(flipX * 1.0f, -1.0f, 1.0f)),
+                                           1.0f, 0.09f, 0.232f, shininess),
+                                     glm::vec3(flipX * 1.0f, -1.0f, 1.0f)),
                     i);
         } else {
             updateDirectional(
                     DirectionalLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
-                                           1.0f, 0.09f, 0.232f, shininess), glm::vec3(flipX * 1.0f, -1.0f, -1.0f)),
+                                           1.0f, 0.09f, 0.232f, shininess),
+                                     glm::vec3(flipX * 1.0f, -1.0f, -1.0f)),
                     i);
         }
 
     }
     for (uint32_t i = 0; i < NR_SPOT_LIGHTS; i++) {
         updateSpot(SpotLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
-                                          1.0f, 0.09f, 0.232f, shininess), glm::vec3(0.0f, 50.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), 12.5f, 17.5f), i);
+                                   1.0f, 0.09f, 0.232f, shininess), glm::vec3(0.0f, 50.0f, 0.0f),
+                             glm::vec3(0.0f, -1.0f, 0.0f), 12.5f, 17.5f), i);
     }
 }
 

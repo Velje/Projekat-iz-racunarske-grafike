@@ -63,17 +63,20 @@ void GUIController::draw() {
         if (i < 2) {
             light->updateDirectional(
                     DirectionalLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
-                                           1.0f, 0.09f, 0.232f, shininess), glm::vec3(flipX * 1.0f, -1.0f, 1.0f)),
+                                           1.0f, 0.09f, 0.232f, shininess),
+                                     glm::vec3(flipX * 1.0f, -1.0f, 1.0f)),
                     i);
         } else {
             light->updateDirectional(
                     DirectionalLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
-                                           1.0f, 0.09f, 0.232f, shininess), glm::vec3(flipX * 1.0f, -1.0f, -1.0f)),
+                                           1.0f, 0.09f, 0.232f, shininess),
+                                     glm::vec3(flipX * 1.0f, -1.0f, -1.0f)),
                     i);
         }
         for (size_t i = 0; i < NR_SPOT_LIGHTS; i++) {
             light->updateSpot(SpotLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
-                                                    1.0f, 0.09f, 0.232f, shininess), glm::vec3(0.0f, 50.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), 12.5f, 17.5f), i);
+                                              1.0f, 0.09f, 0.232f, shininess), glm::vec3(0.0f, 50.0f, 0.0f),
+                                        glm::vec3(0.0f, -1.0f, 0.0f), 12.5f, 17.5f), i);
         }
     }
     ImGui::End();

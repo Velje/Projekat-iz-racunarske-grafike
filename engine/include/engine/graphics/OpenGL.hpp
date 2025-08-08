@@ -145,14 +145,15 @@ public:
 
     static void enable_antialiasing();
 
-    static std::array<uint32_t, 3> generateGbuffer(uint32_t& gBuffer, uint32_t& rboDepth, std::array <uint32_t, 3>& attachments,
-                                                                     uint32_t SCR_WIDTH, uint32_t SCR_HEIGHT);
+    static std::array<uint32_t, 3> generateGbuffer(uint32_t &gBuffer, uint32_t &rboDepth,
+                                                   std::array<uint32_t, 3> &attachments,
+                                                   const int32_t &SCR_WIDTH, const int32_t &SCR_HEIGHT);
 
-    static void activateGbuffertextures(std::array<uint32_t, 3>& textureIDs);
+    static void activateGbuffertextures(std::array<uint32_t, 3> &textureIDs);
 
     static void bindFrameBuffer(uint32_t buffer);
 
-    static void writeToDefaultFramebuffer(uint32_t& buffer, uint32_t SCR_WIDTH, uint32_t SCR_HEIGHT);
+    static void writeToDefaultFramebuffer(uint32_t &buffer, const int32_t &SCR_WIDTH, const int32_t &SCR_HEIGHT);
 
     static void renderScreen();
 
@@ -162,6 +163,7 @@ private:
     * @param location Source location from where the OpenGL call was made.
     */
     static void assert_no_error(std::source_location location);
+
 
 };
 }
