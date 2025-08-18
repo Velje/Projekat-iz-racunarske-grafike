@@ -277,6 +277,15 @@ void OpenGL::renderScreen() {
     glBindVertexArray(0);
 }
 
+void OpenGL::enable_backCulling() {
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+}
+
+void OpenGL::disable_culling() {
+    glDisable(GL_CULL_FACE);
+}
+
 uint32_t face_index(std::string_view name) {
     if (name == "right") {
         return 0;

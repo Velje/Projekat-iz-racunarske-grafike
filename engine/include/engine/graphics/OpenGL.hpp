@@ -145,6 +145,10 @@ public:
 
     static void enable_antialiasing();
 
+    static void enable_backCulling();
+
+    static void disable_culling();
+
     static std::array<uint32_t, 3> generateGbuffer(uint32_t &gBuffer, uint32_t &rboDepth,
                                                    std::array<uint32_t, 3> &attachments,
                                                    const int32_t &SCR_WIDTH, const int32_t &SCR_HEIGHT);

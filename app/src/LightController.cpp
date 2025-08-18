@@ -58,7 +58,7 @@ void LightController::initialize() {
     }
     for (uint32_t i = 0; i < NR_SPOT_LIGHTS; i++) {
         updateSpot(SpotLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
-                                   1.0f, 0.0f, 0.0f, shininess), glm::vec3(0.0f, 30.0f, 200.0f),
+                                   1.0f, 0.0f, 0.0f, shininess), glm::vec3(0.0f, 25.0f, 200.0f),
                              glm::vec3(0.0f, -1.0f, 0.0f), cos(glm::radians(60.0f)), cos(glm::radians(75.0f))), i);
     }
 }

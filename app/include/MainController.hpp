@@ -52,6 +52,8 @@ private:
     void drawPlatform();
 
     void drawLightBulbs();
+
+    void drawUFO2();
 };
 }
 #endif //MAINCONTROLLER_HPP

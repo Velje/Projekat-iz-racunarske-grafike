@@ -14,7 +14,7 @@ const std::unordered_map<engine::platform::KeyId, engine::graphics::Camera::Move
 
 static uint32_t gBuffer, rboDepth;
 static std::array<uint32_t, 3> attachments, textureIDs;
-static std::vector<glm::mat4> lightModelMatrices, alienMatrices;
+static std::vector<glm::mat4> lightModelMatrices, alienMatrices, ufoMatrices;
 
 void initialize_keyid_maps();
 
@@ -59,13 +59,14 @@ void MainController::initialize() {
     }
     for (uint64_t i = 0; i < 900; i++) {
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(aliens[i].first, 4.0f, 200.0f + aliens[i].second));
+        model = glm::translate(model, glm::vec3(aliens[i].first, 7.0f, 200.0f + aliens[i].second));
         model = glm::scale(model, glm::vec3(0.1f));
+        ufoMatrices.push_back(model);
         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         alienMatrices.push_back(model);
     }
-    lightModelMatrices.push_back(glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 30.0f, 200.0f)),
+    lightModelMatrices.push_back(glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 25.0f, 200.0f)),
                                              glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
 }
 
@@ -180,10 +181,12 @@ void MainController::geometryPass() {
     engine::graphics::OpenGL::bindFrameBuffer(gBuffer);
     engine::graphics::OpenGL::clear_buffers();
     drawTerrain();
-    drawLightBulbs();
+    engine::graphics::OpenGL::enable_backCulling();
+//    drawLightBulbs();
     drawUFO();
+    drawUFO2();
     drawEarth();
-    drawAlien();
+//    drawAlien();
 //    drawPlatform();
     engine::graphics::OpenGL::bindFrameBuffer(0);
 }
@@ -251,11 +254,26 @@ void MainController::drawUFO() {
     defaultShader->set_mat4("view", graphics->camera()
                                             ->view_matrix());
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 24.0f, 200.0f));
+    model = glm::translate(model, glm::vec3(0.0f, 25.0f, 200.0f));
     model = glm::scale(model, glm::vec3(5.0f));
     defaultShader->set_mat3("normalModelMatrix", glm::mat3(glm::transpose(glm::inverse(model))));
     defaultShader->set_mat4("model", model);
     ufo_obj->draw(defaultShader);
+}
+
+void MainController::drawUFO2() {
+    auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
+    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+    engine::resources::Model *lowpolyUFO = resources->model("Low_poly_ufo_OBJ");
+    engine::resources::Shader *instancingShader = resources->shader("instancing");
+    instancingShader->use();
+    instancingShader->set_mat4("projection", graphics->projection_matrix());
+    instancingShader->set_mat4("view", graphics->camera()
+                                               ->view_matrix());
+    glm::mat4 model = glm::mat4(0.1f);
+    instancingShader->set_mat3("normalModelMatrix", glm::mat3(glm::transpose(glm::inverse(model))));
+    lowpolyUFO->prepareInstancing(ufoMatrices, ufoMatrices.size());
+    lowpolyUFO->drawInstances(instancingShader, ufoMatrices.size());
 }
 
 void MainController::drawLightBulbs() {
@@ -320,6 +338,7 @@ void MainController::begin_draw() {
 void MainController::draw() {
     deferredRender();
     drawSkybox();
+    engine::graphics::OpenGL::disable_culling();
 }
 
 void MainController::end_draw() {

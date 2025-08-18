@@ -94,8 +94,8 @@ void main() {
             vec3 diffuse = light[i].diffuseStrength * calculateDiffuse(modelNormal, lightDir) * light[i].color * modelDiffuse;
             vec3 specular = light[i].specularStrength * calculateSpecular(viewDir, reflectDir, light[i].shininess) * light[i].color * modelSpecular;
             float distance = length(light[i].position - FragPos);
-            if (distance <= 20.0f) {
-                result += (ambient + diffuse + specular) / (light[i].constant + light[i].linear * distance + light[i].quadratic * distance * distance);
+            if (distance <= 50.0f) {
+                result += (diffuse + specular) / (light[i].constant + light[i].linear * distance + light[i].quadratic * distance * distance);
             }
         }
     }
@@ -107,7 +107,7 @@ void main() {
             vec3 diffuse = dirLight[i].diffuseStrength * calculateDiffuse(modelDiffuse, lightDir) * dirLight[i].color * modelDiffuse;
             vec3 specular = dirLight[i].specularStrength * calculateSpecular(lightDir, reflectDir, dirLight[i].shininess) * dirLight[i].color * modelSpecular;
             float distance = length(dirLight[i].direction);
-            result += (diffuse);
+            result += (diffuse) / (dirLight[i].constant + dirLight[i].linear * distance + dirLight[i].quadratic * distance * distance);
         }
     }
     for (uint i = 0; i < NR_SPOT_LIGHTS; i++) {
@@ -122,7 +122,9 @@ void main() {
             vec3 diffuse = intensity * spotLight[i].diffuseStrength * calculateDiffuse(modelDiffuse, lightDir) * spotLight[i].color * modelDiffuse;
             vec3 specular = intensity * spotLight[i].specularStrength * calculateSpecular(viewDir, reflectDir, spotLight[i].shininess) * spotLight[i].color * modelSpecular;
             float distance = length(spotLight[i].position - FragPos);
-            result += (ambient + diffuse) / (spotLight[i].constant + spotLight[i].linear * distance + spotLight[i].quadratic * distance * distance);
+            if (distance <= 50.0f) {
+                result += (ambient + diffuse) / (spotLight[i].constant + spotLight[i].linear * distance + spotLight[i].quadratic * distance * distance);
+            }
         }
     }
     result = min(result, vec3(1.0f));
