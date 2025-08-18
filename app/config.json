@@ -1,17 +1,28 @@
 {
   "resources": {
     "models": {
+      "Lightbulb": {
+        "path": "light_bulb1/scene.gltf"
+      },
       "brown_mud": {
         "path": "brown_mud/brown_mud.obj"
       },
+      "Earth": {
+        "path": "earth3/Earth.obj",
+        "flip_uvs": true
+      },
       "UFO_obj": {
         "path": "UFO_obj/UFO.obj"
+      },
+      "GrayAlien": {
+        "path": "GrayAlien/10469_GrayAlien_v01.obj"
       }
     }
   },
   "window": {
-    "width": 1600,
-    "height": 800,
-    "title": "Hello, window!"
+    "width": 1920,
+    "height": 1080,
+    "title": "Hello, window!",
+    "fullscreen": true
   }
 }

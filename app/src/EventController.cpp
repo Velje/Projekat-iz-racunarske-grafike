@@ -40,10 +40,7 @@ void EventController::instaLog(Action action) {
 }
 
 void EventController::logActions() {
-    if (actions.empty()) {
-        auto eventController = engine::core::Controller::get<EventController>();
-        eventController->instaLog(Action(Actions::NOTHING, 0, EventA::NOTHING_A, 0, EventB::NOTHING_B));
-    } else {
+    if (!actions.empty()) {
         for (auto &action: actions) {
             logAction(action);
         }

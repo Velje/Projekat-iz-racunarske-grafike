@@ -8,12 +8,36 @@ static std::array<DirectionalLight, NR_DIR_LIGHTS> directionalLights;
 static std::array<SpotLight, NR_SPOT_LIGHTS> spotLights;
 
 void LightController::initialize() {
+    std::vector<std::pair<float, float>> lights;
+    const uint32_t gridSize = 8;
+    const float spacing = 200.0f / gridSize;
+
+    for (uint32_t row = 0; row < gridSize; ++row) {
+        for (uint32_t col = 0; col < gridSize; ++col) {
+            float x = -100.0f + col * spacing + spacing / 2.0f;
+            float z = -100.0f + row * spacing + spacing / 2.0f;
+            lights.emplace_back(x, z);
+        }
+    }
+    glm::mat4 model = glm::mat4(1.0f);
     for (size_t i = 0; i < NR_POINT_LIGHTS; i++) {
+        if (i % 4 == 0) {
+            lightColor = glm::vec3(1.0f, 0.0f, 0.0f);
+        } else if (i % 4 == 1) {
+            lightColor = glm::vec3(0.0f, 1.0f, 0.0f);
+        } else if (i % 4 == 2) {
+            lightColor = glm::vec3(0.0f, 0.0f, 1.0f);
+        } else {
+            lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+        }
         updatePoint(
-                PointLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
-                                 1.0f, 0.09f, 0.232f, shininess),
-                           glm::vec3(sin(2 * i * M_PI / NR_POINT_LIGHTS) * 80.0f, 4.0f,
-                                     cos(2 * i * M_PI / NR_POINT_LIGHTS) * 80.0f)),
+                PointLight(
+                        Light(lightColor, ambientStrength,
+                              diffuseStrength,
+                              specularStrength,
+                              1.0f, 1.0f, 0.0, shininess),
+                        glm::vec3(lights[i].first, 4.0f,
+                                  200.0f + lights[i].second)),
                 i);
     }
     for (size_t i = 0; i < NR_DIR_LIGHTS; i++) {
@@ -21,22 +45,21 @@ void LightController::initialize() {
         if (i < 2) {
             updateDirectional(
                     DirectionalLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
-                                           1.0f, 0.09f, 0.232f, shininess),
+                                           1.0f, 0.0f, 1.0f, shininess),
                                      glm::vec3(flipX * 1.0f, -1.0f, 1.0f)),
                     i);
         } else {
             updateDirectional(
                     DirectionalLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
-                                           1.0f, 0.09f, 0.232f, shininess),
+                                           1.0f, 0.0f, 1.0f, shininess),
                                      glm::vec3(flipX * 1.0f, -1.0f, -1.0f)),
                     i);
         }
-
     }
     for (uint32_t i = 0; i < NR_SPOT_LIGHTS; i++) {
         updateSpot(SpotLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
-                                   1.0f, 0.09f, 0.232f, shininess), glm::vec3(0.0f, 50.0f, 0.0f),
-                             glm::vec3(0.0f, -1.0f, 0.0f), 12.5f, 17.5f), i);
+                                   1.0f, 0.0f, 0.0f, shininess), glm::vec3(0.0f, 30.0f, 200.0f),
+                             glm::vec3(0.0f, -1.0f, 0.0f), cos(glm::radians(60.0f)), cos(glm::radians(75.0f))), i);
     }
 }
 
@@ -56,7 +79,7 @@ void LightController::updatePoint(PointLight newLight, size_t index) {
     pointLights[index] = newLight;
 }
 
-const std::array<PointLight, NR_POINT_LIGHTS> &LightController::getPointLights() {
+std::array<PointLight, NR_POINT_LIGHTS> &LightController::getPointLights() {
     return pointLights;
 }
 
@@ -69,7 +92,7 @@ void LightController::updateDirectional(DirectionalLight newLight, size_t index)
     directionalLights[index] = newLight;
 }
 
-const std::array<DirectionalLight, NR_DIR_LIGHTS> &LightController::getDirectionalLights() {
+std::array<DirectionalLight, NR_DIR_LIGHTS> &LightController::getDirectionalLights() {
     return directionalLights;
 }
 
@@ -82,7 +105,7 @@ void LightController::updateSpot(SpotLight newLight, size_t index) {
     spotLights[index] = newLight;
 }
 
-const std::array<SpotLight, NR_SPOT_LIGHTS> &LightController::getSpotLights() {
+std::array<SpotLight, NR_SPOT_LIGHTS> &LightController::getSpotLights() {
     return spotLights;
 }
 

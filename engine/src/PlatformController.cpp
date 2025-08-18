@@ -50,12 +50,20 @@ void PlatformController::initialize() {
     int window_width = config["window"]["width"];
     int window_height = config["window"]["height"];
     std::string window_title = config["window"]["title"];
-    GLFWwindow *handle = glfwCreateWindow(window_width, window_height, window_title.c_str(), nullptr,
-                                          nullptr);
+    bool fullscreen = config["window"]["fullscreen"];
+    GLFWwindow *handle;
+    if (!fullscreen) {
+        handle = glfwCreateWindow(window_width, window_height, window_title.c_str(), nullptr,
+                                  nullptr);
+    } else {
+        handle = glfwCreateWindow(window_width, window_height, window_title.c_str(), glfwGetPrimaryMonitor(),
+                                  nullptr);
+    }
     RG_GUARANTEE(handle, "GLFW3 platform failed to create a Window.");
     m_window = Window(handle, window_width, window_height, window_title);
 
     glfwMakeContextCurrent(m_window.handle_());
+    glfwSwapInterval(0);
     glfwSetCursorPosCallback(m_window.handle_(), glfw_mouse_callback);
     glfwSetScrollCallback(m_window.handle_(), glfw_scroll_callback);
     glfwSetKeyCallback(m_window.handle_(), glfw_key_callback);
@@ -63,7 +71,7 @@ void PlatformController::initialize() {
     glfwSetMouseButtonCallback(m_window.handle_(), glfw_mouse_button_callback);
     glfwSetWindowCloseCallback(m_window.handle_(), glfw_window_close_callback);
     glfwSetInputMode(m_window.handle_(), GLFW_RAW_MOUSE_MOTION, true);
-    glfwWindowHint(GLFW_SAMPLES, 16);
+//    glfwWindowHint(GLFW_SAMPLES, 16);
     int major, minor, revision;
     glfwGetVersion(&major, &minor, &revision);
     spdlog::info("Platform[GLFW {}.{}.{}]", major, minor, revision);

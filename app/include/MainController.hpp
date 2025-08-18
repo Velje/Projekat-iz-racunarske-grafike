@@ -30,6 +30,8 @@ private:
 
     void end_draw() override;
 
+    void deferredRender();
+
     void drawTerrain();
 
     void drawSkybox();
@@ -38,6 +40,18 @@ private:
 
     std::string_view name() const override;
 
+
+    void geometryPass();
+
+    void lightPass();
+
+    void drawAlien();
+
+    void drawEarth();
+
+    void drawPlatform();
+
+    void drawLightBulbs();
 };
 }
 #endif //MAINCONTROLLER_HPP

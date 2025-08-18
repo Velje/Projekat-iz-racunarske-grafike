@@ -8,9 +8,12 @@
 
 namespace app {
 
-static glm::vec3 lightColor(60.0f/255, 10.0f/255, 10.0f/255);
-static glm::vec3 ambientStrength(12.0f, 2.0f, 122.0f), diffuseStrength(11.0f, 12.0f, 122.f), specularStrength(0.0f);
-static float shininess = 1.0f;
+static glm::vec3 lightColor(1.0f);
+static glm::vec3 ambientStrength(1.0f), diffuseStrength(1.0f), specularStrength(1.0f);
+static float shininess = 2048.0f;
+const static size_t NR_POINT_LIGHTS = 64;
+const static size_t NR_DIR_LIGHTS = 4;
+const static size_t NR_SPOT_LIGHTS = 1;
 
 class Light {
 public:
@@ -43,18 +46,14 @@ public:
     float outerCutOff;
 };
 
-const static size_t NR_POINT_LIGHTS = 8;
-const static size_t NR_DIR_LIGHTS = 4;
-const static size_t NR_SPOT_LIGHTS = 1;
-
 class LightController : public engine::core::Controller {
 public:
 
-    const std::array<PointLight, NR_POINT_LIGHTS> &getPointLights();
+    static std::array<PointLight, NR_POINT_LIGHTS> &getPointLights();
 
-    const std::array<DirectionalLight, NR_DIR_LIGHTS> &getDirectionalLights();
+    static std::array<DirectionalLight, NR_DIR_LIGHTS> &getDirectionalLights();
 
-    const std::array<SpotLight, NR_SPOT_LIGHTS> &getSpotLights();
+    static std::array<SpotLight, NR_SPOT_LIGHTS> &getSpotLights();
 
     void updatePoint(PointLight newLight, size_t index);
 

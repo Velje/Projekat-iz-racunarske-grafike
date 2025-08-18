@@ -50,34 +50,26 @@ void GUIController::draw() {
     ImGui::DragFloat3("diffuseStrength", glm::value_ptr(diffuseStrength), 20.0f, 0.0f, 10000.0f);
     ImGui::DragFloat3("specularStrength", glm::value_ptr(specularStrength), 20.0f, 0.0f, 10000.0f);
     ImGui::DragFloat("shininess", &shininess, 2.0f, 0.0f, 2048.0f);
-    for (size_t i = 0; i < NR_POINT_LIGHTS; i++) {
-        light->updatePoint(
-                PointLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
-                                 1.0f, 0.09f, 0.232f, shininess),
-                           glm::vec3(sin(2 * i * M_PI / NR_POINT_LIGHTS) * 80.0f, 4.0f,
-                                     cos(2 * i * M_PI / NR_POINT_LIGHTS) * 80.0f)),
-                i);
+    for (auto &pointLight: light->getPointLights()) {
+        pointLight.color = lightColor;
+        pointLight.ambientStrength = ambientStrength;
+        pointLight.diffuseStrength = diffuseStrength;
+        pointLight.specularStrength = specularStrength;
+        pointLight.shininess = shininess;
     }
-    for (size_t i = 0; i < NR_DIR_LIGHTS; i++) {
-        auto flipX = i % 2 ? 1.0f : -1.0f;
-        if (i < 2) {
-            light->updateDirectional(
-                    DirectionalLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
-                                           1.0f, 0.09f, 0.232f, shininess),
-                                     glm::vec3(flipX * 1.0f, -1.0f, 1.0f)),
-                    i);
-        } else {
-            light->updateDirectional(
-                    DirectionalLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
-                                           1.0f, 0.09f, 0.232f, shininess),
-                                     glm::vec3(flipX * 1.0f, -1.0f, -1.0f)),
-                    i);
-        }
-        for (size_t i = 0; i < NR_SPOT_LIGHTS; i++) {
-            light->updateSpot(SpotLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
-                                              1.0f, 0.09f, 0.232f, shininess), glm::vec3(0.0f, 50.0f, 0.0f),
-                                        glm::vec3(0.0f, -1.0f, 0.0f), 12.5f, 17.5f), i);
-        }
+    for (auto &dirLight: light->getDirectionalLights()) {
+        dirLight.color = lightColor;
+        dirLight.ambientStrength = ambientStrength;
+        dirLight.diffuseStrength = diffuseStrength;
+        dirLight.specularStrength = specularStrength;
+        dirLight.shininess = shininess;
+    }
+    for (auto &spotLight: light->getSpotLights()) {
+        spotLight.color = lightColor;
+        spotLight.ambientStrength = ambientStrength;
+        spotLight.diffuseStrength = diffuseStrength;
+        spotLight.specularStrength = specularStrength;
+        spotLight.shininess = shininess;
     }
     ImGui::End();
     graphics->end_gui();
