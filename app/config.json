@@ -8,7 +8,7 @@
         "path": "earth3/Earth.obj",
         "flip_uvs": true
       },
-      "UFO_obj": {
+      "UFO": {
         "path": "UFO_obj/UFO.obj"
       },
       "Low_poly_ufo_OBJ": {

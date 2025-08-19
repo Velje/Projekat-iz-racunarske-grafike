@@ -28,7 +28,7 @@ void LightController::initialize() {
         } else if (i % 4 == 2) {
             lightColor = glm::vec3(0.0f, 0.0f, 1.0f);
         } else {
-            lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+            lightColor = glm::vec3(1.0f, 0.0f, 1.0f);
         }
         updatePoint(
                 PointLight(
@@ -40,6 +40,7 @@ void LightController::initialize() {
                                   200.0f + lights[i].second)),
                 i);
     }
+    lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
     for (size_t i = 0; i < NR_DIR_LIGHTS; i++) {
         auto flipX = i % 2 ? 1.0f : -1.0f;
         if (i < 2) {
@@ -57,9 +58,21 @@ void LightController::initialize() {
         }
     }
     for (uint32_t i = 0; i < NR_SPOT_LIGHTS; i++) {
+        if (i % 4 == 0) {
+            lightColor = glm::vec3(1.0f, 0.0f, 0.0f);
+        } else if (i % 4 == 1) {
+            lightColor = glm::vec3(0.0f, 1.0f, 0.0f);
+        } else if (i % 4 == 2) {
+            lightColor = glm::vec3(0.0f, 0.0f, 1.0f);
+        } else {
+            lightColor = glm::vec3(1.0f, 0.0f, 1.0f);
+        }
+        double angle = 2 * i * M_PI / NR_SPOT_LIGHTS;
         updateSpot(SpotLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
-                                   1.0f, 0.0f, 0.0f, shininess), glm::vec3(0.0f, 25.0f, 200.0f),
-                             glm::vec3(0.0f, -1.0f, 0.0f), cos(glm::radians(60.0f)), cos(glm::radians(75.0f))), i);
+                                   1.0f, 0.0f, 0.0f, shininess),
+                             glm::vec3(50.0f * cos(angle), 35.0f,
+                                       200.0f + 50.0f * sin(angle)),
+                             glm::vec3(0.0f, -1.0f, 0.0f), cos(glm::radians(5.0f)), cos(glm::radians(15.0f))), i);
     }
 }
 
@@ -162,6 +175,21 @@ void LightController::setShaderSpotLights(engine::resources::Shader *shader, con
         shader->set_float(name + "[" + std::to_string(i) + "].outcutOff", lights[i].outerCutOff);
         shader->set_bool(name + "[" + std::to_string(i) + "].enabled", lights[i].enabled);
     }
+}
+
+void LightController::update() {
+    auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
+    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+    engine::resources::Shader *lightShader = resources->shader("lightPass");
+    lightShader->use();
+    lightShader->set_int("gPosition", 0);
+    lightShader->set_int("gNormal", 1);
+    lightShader->set_int("gAlbedoSpec", 2);
+    lightShader->set_vec3("viewPos", graphics->camera()
+                                             ->Position);
+    setShaderPointLights(lightShader, "light", pointLights);
+    setShaderDirLights(lightShader, "dirLight", directionalLights);
+    setShaderSpotLights(lightShader, "spotLight", spotLights);
 }
 
 }

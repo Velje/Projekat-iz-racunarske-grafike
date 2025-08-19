@@ -10,10 +10,10 @@ void MainApp::app_setup() {
     auto guiController = register_controller<app::GUIController>();
     auto eventController = register_controller<app::EventController>();
     auto lightController = register_controller<app::LightController>();
-    mainController->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());
+    lightController->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());
+    lightController->before(mainController);
     mainController->before(guiController);
-    guiController->before(lightController);
-    lightController->before(eventController);
+    guiController->before(eventController);
     spdlog::info("App setup completed!");
 }
 }

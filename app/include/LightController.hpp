@@ -13,7 +13,7 @@ static glm::vec3 ambientStrength(1.0f), diffuseStrength(1.0f), specularStrength(
 static float shininess = 2048.0f;
 const static size_t NR_POINT_LIGHTS = 64;
 const static size_t NR_DIR_LIGHTS = 4;
-const static size_t NR_SPOT_LIGHTS = 1;
+const static size_t NR_SPOT_LIGHTS = 16;
 
 class Light {
 public:
@@ -55,32 +55,34 @@ public:
 
     static std::array<SpotLight, NR_SPOT_LIGHTS> &getSpotLights();
 
-    void updatePoint(PointLight newLight, size_t index);
+    static void updatePoint(PointLight newLight, size_t index);
 
-    void setShaderPointLights(engine::resources::Shader *shader, const std::string &name,
-                              std::array<PointLight, NR_POINT_LIGHTS> &lights);
+    static void updateDirectional(DirectionalLight newLight, size_t index);
 
-    void updateDirectional(DirectionalLight newLight, size_t index);
+    static void updateSpot(SpotLight newLight, size_t index);
 
-    void setShaderDirLights(engine::resources::Shader *shader, const std::string &name,
-                            std::array<DirectionalLight, NR_DIR_LIGHTS> &lights);
+    static void togglePoint(PointLight &light);
 
-    void updateSpot(SpotLight newLight, size_t index);
+    static void toggleDirectional(DirectionalLight &light);
 
-    void setShaderSpotLights(engine::resources::Shader *shader, const std::string &name,
-                             std::array<SpotLight, NR_SPOT_LIGHTS> &lights);
+    static void toggleSpot(SpotLight &light);
 
-    void togglePoint(PointLight &light);
-
-    void toggleDirectional(DirectionalLight &light);
-
-    void toggleSpot(SpotLight &light);
+    void update() override;
 
 private:
 
     void initialize() override;
 
     void poll_events() override;
+
+    void setShaderPointLights(engine::resources::Shader *shader, const std::string &name,
+                              std::array<PointLight, NR_POINT_LIGHTS> &lights);
+
+    void setShaderDirLights(engine::resources::Shader *shader, const std::string &name,
+                            std::array<DirectionalLight, NR_DIR_LIGHTS> &lights);
+
+    void setShaderSpotLights(engine::resources::Shader *shader, const std::string &name,
+                             std::array<SpotLight, NR_SPOT_LIGHTS> &lights);
 
     std::string_view name() const override;
 

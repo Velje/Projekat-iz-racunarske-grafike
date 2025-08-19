@@ -13,7 +13,7 @@ class MainController : public engine::core::Controller {
 public:
     static void update_camera();
 
-    const std::unordered_map<engine::platform::KeyId, engine::graphics::Camera::Movement> &getKeyIdToCameraMovement();
+    static const std::unordered_map<engine::platform::KeyId, engine::graphics::Camera::Movement> &getKeyIdToCameraMovement();
 
 private:
     void initialize() override;
@@ -40,18 +40,13 @@ private:
 
     std::string_view name() const override;
 
-
     void geometryPass();
 
     void lightPass();
 
-    void drawAlien();
-
     void drawEarth();
 
     void drawPlatform();
-
-    void drawLightBulbs();
 
     void drawUFO2();
 };

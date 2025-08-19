@@ -50,21 +50,21 @@ void GUIController::draw() {
     ImGui::DragFloat3("diffuseStrength", glm::value_ptr(diffuseStrength), 20.0f, 0.0f, 10000.0f);
     ImGui::DragFloat3("specularStrength", glm::value_ptr(specularStrength), 20.0f, 0.0f, 10000.0f);
     ImGui::DragFloat("shininess", &shininess, 2.0f, 0.0f, 2048.0f);
-    for (auto &pointLight: light->getPointLights()) {
+    for (auto &pointLight: LightController::getPointLights()) {
         pointLight.color = lightColor;
         pointLight.ambientStrength = ambientStrength;
         pointLight.diffuseStrength = diffuseStrength;
         pointLight.specularStrength = specularStrength;
         pointLight.shininess = shininess;
     }
-    for (auto &dirLight: light->getDirectionalLights()) {
+    for (auto &dirLight: LightController::getDirectionalLights()) {
         dirLight.color = lightColor;
         dirLight.ambientStrength = ambientStrength;
         dirLight.diffuseStrength = diffuseStrength;
         dirLight.specularStrength = specularStrength;
         dirLight.shininess = shininess;
     }
-    for (auto &spotLight: light->getSpotLights()) {
+    for (auto &spotLight: LightController::getSpotLights()) {
         spotLight.color = lightColor;
         spotLight.ambientStrength = ambientStrength;
         spotLight.diffuseStrength = diffuseStrength;

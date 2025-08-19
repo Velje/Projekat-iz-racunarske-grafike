@@ -41,7 +41,7 @@ void MainPlatformEventObserver::on_key(engine::platform::Key key) {
     auto guiController = engine::core::Controller::get<GUIController>();
     if (!guiController->is_enabled()) {
         auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
-        auto keyIdToCameraMovement = engine::core::Controller::get<MainController>()->getKeyIdToCameraMovement();
+        auto keyIdToCameraMovement = MainController::getKeyIdToCameraMovement();
         if (keyIdToCameraMovement.contains(key.id())) {
         }
     }
