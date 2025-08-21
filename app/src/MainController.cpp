@@ -15,7 +15,7 @@ const std::unordered_map<engine::platform::KeyId, engine::graphics::Camera::Move
 static uint32_t gBuffer, rboDepth;
 static std::array<uint32_t, 3> attachments, textureIDs;
 static std::vector<glm::mat4> ufoMatrices;
-static double t = 0.0;
+static float t = 0.0;
 
 void initialize_keyid_maps();
 
@@ -153,9 +153,8 @@ void MainController::geometryPass() {
 }
 
 void MainController::lightPass() {
-    auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
     auto light = engine::core::Controller::get<LightController>();
-    light->update();
+    light->updateLights();
     engine::graphics::OpenGL::activateGbuffertextures(textureIDs);
     engine::graphics::OpenGL::renderScreen();
 }
@@ -207,7 +206,8 @@ void MainController::drawUFO() {
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, 25.0f, 200.0f));
     model = glm::scale(model, glm::vec3(20.0f));
-    model = glm::rotate(model, glm::radians(100.0f * platform->getGlfwTime()),
+    float angle = t + 2.0f * M_PI / NR_SPOT_LIGHTS;
+    model = glm::rotate(model, angle,
                         glm::vec3(0.0f, -1.0f, 0.0f));
     defaultShader->set_mat3("normalModelMatrix", glm::mat3(glm::transpose(glm::inverse(model))));
     defaultShader->set_mat4("model", model);
@@ -265,18 +265,12 @@ void MainController::draw() {
 
 void MainController::end_draw() {
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
-    if (t > 1.0) {
-        t = platform->dt() * 10.0f;
-    }
     auto &spotLights = LightController::getSpotLights();
-    for (uint32_t i = 0; i < NR_SPOT_LIGHTS; i++) {
-        double angle = 2 * i * M_PI / NR_SPOT_LIGHTS;
-        glm::vec3 startVector = glm::vec3(50.0f * cos(angle), 35.0f, 200.0f + 50.0f * sin(angle));
-        angle += 2 * M_PI / NR_SPOT_LIGHTS;
-        glm::vec3 endVector = glm::vec3(50.0f * cos(angle), 35.0f, 200.0f + 50.0f * sin(angle));
-        spotLights[i].position = startVector + glm::vec3(t) * (endVector - startVector);
-    }
     t += platform->dt() * 10.0f;
+    for (uint32_t i = 0; i < NR_SPOT_LIGHTS; i++) {
+        float angle = t + 2 * i * M_PI / NR_SPOT_LIGHTS;
+        spotLights[i].position = glm::vec3(50.0f * cos(angle), 35.0f, 200.0f + 50.0f * sin(angle));;
+    }
     engine::core::Controller::get<engine::platform::PlatformController>()->swap_buffers();
 }
 

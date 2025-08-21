@@ -94,7 +94,7 @@ void main() {
             vec3 diffuse = light[i].diffuseStrength * calculateDiffuse(modelNormal, lightDir) * light[i].color * modelDiffuse;
             vec3 specular = light[i].specularStrength * calculateSpecular(viewDir, reflectDir, light[i].shininess) * light[i].color * modelSpecular;
             float distance = length(light[i].position - FragPos);
-            if (distance <= 50.0f) {
+            if (distance <= 15.0f) {
                 result += (ambient + diffuse + specular) / (light[i].constant + light[i].linear * distance + light[i].quadratic * distance * distance);
             }
         }

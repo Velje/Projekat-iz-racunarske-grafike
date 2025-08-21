@@ -35,7 +35,7 @@ void LightController::initialize() {
                         Light(lightColor, ambientStrength,
                               diffuseStrength,
                               specularStrength,
-                              1.0f, 1.0f, 0.0, shininess),
+                              1.0f, 0.0f, 0.0, shininess),
                         glm::vec3(lights[i].first, 4.0f,
                                   200.0f + lights[i].second)),
                 i);
@@ -126,7 +126,7 @@ std::string_view LightController::name() const {
     return "app::LightController";
 }
 
-void LightController::setShaderPointLights(engine::resources::Shader *shader, const std::string &name,
+void LightController::setShaderPointLights(engine::resources::Shader *&shader, const std::string &name,
                                            std::array<PointLight, NR_POINT_LIGHTS> &lights) {
     for (size_t i = 0; i < NR_POINT_LIGHTS; i++) {
         shader->set_vec3(name + "[" + std::to_string(i) + "].position", lights[i].position);
@@ -142,7 +142,7 @@ void LightController::setShaderPointLights(engine::resources::Shader *shader, co
     }
 }
 
-void LightController::setShaderDirLights(engine::resources::Shader *shader, const std::string &name,
+void LightController::setShaderDirLights(engine::resources::Shader *&shader, const std::string &name,
                                          std::array<DirectionalLight, NR_DIR_LIGHTS> &lights) {
     for (size_t i = 0; i < NR_DIR_LIGHTS; i++) {
         shader->set_vec3(name + "[" + std::to_string(i) + "].direction", lights[i].direction);
@@ -158,7 +158,7 @@ void LightController::setShaderDirLights(engine::resources::Shader *shader, cons
     }
 }
 
-void LightController::setShaderSpotLights(engine::resources::Shader *shader, const std::string &name,
+void LightController::setShaderSpotLights(engine::resources::Shader *&shader, const std::string &name,
                                           std::array<SpotLight, NR_SPOT_LIGHTS> &lights) {
     for (size_t i = 0; i < NR_SPOT_LIGHTS; i++) {
         shader->set_vec3(name + "[" + std::to_string(i) + "].position", lights[i].position);
@@ -177,7 +177,7 @@ void LightController::setShaderSpotLights(engine::resources::Shader *shader, con
     }
 }
 
-void LightController::update() {
+void LightController::updateLights() {
     auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
     engine::resources::Shader *lightShader = resources->shader("lightPass");
