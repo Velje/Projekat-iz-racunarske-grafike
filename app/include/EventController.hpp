@@ -47,9 +47,9 @@ public:
 class EventController : public engine::core::Controller {
 public:
 
-    void notify(Action action);
+    static void notify(Action action);
 
-    void instaLog(Action action);
+    static void instaLog(Action action);
 
     static std::string_view actionsString(Actions &action);
 

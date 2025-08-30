@@ -19,7 +19,7 @@ void GUIController::poll_events() {
         auto eventStart = platform->getGlfwTime();
         eventController->set_enable(!eventController->is_enabled());
         auto eventEnd = platform->getGlfwTime();
-        eventController->instaLog(
+        EventController::instaLog(
                 Action(Actions::PRESS, actionEnd - actionStart, EventA::KEYBOARD, eventEnd - eventStart,
                        EventB::GUI_TOGGLE));
         set_enable(!is_enabled());

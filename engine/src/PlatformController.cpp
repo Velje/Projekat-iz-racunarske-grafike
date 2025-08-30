@@ -63,7 +63,6 @@ void PlatformController::initialize() {
     m_window = Window(handle, window_width, window_height, window_title);
 
     glfwMakeContextCurrent(m_window.handle_());
-    glfwSwapInterval(0);
     glfwSetCursorPosCallback(m_window.handle_(), glfw_mouse_callback);
     glfwSetScrollCallback(m_window.handle_(), glfw_scroll_callback);
     glfwSetKeyCallback(m_window.handle_(), glfw_key_callback);

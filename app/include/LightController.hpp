@@ -67,7 +67,7 @@ public:
 
     static void toggleSpot(SpotLight &light);
 
-    void updateLights();
+    static void updateLights();
 
 private:
 
@@ -75,14 +75,14 @@ private:
 
     void poll_events() override;
 
-    void setShaderPointLights(engine::resources::Shader *&shader, const std::string &name,
-                              std::array<PointLight, NR_POINT_LIGHTS> &lights);
+    static void setShaderPointLights(engine::resources::Shader *&shader, const std::string &name,
+                                     std::array<PointLight, NR_POINT_LIGHTS> &lights);
 
-    void setShaderDirLights(engine::resources::Shader *&shader, const std::string &name,
-                            std::array<DirectionalLight, NR_DIR_LIGHTS> &lights);
+    static void setShaderDirLights(engine::resources::Shader *&shader, const std::string &name,
+                                   std::array<DirectionalLight, NR_DIR_LIGHTS> &lights);
 
-    void setShaderSpotLights(engine::resources::Shader *&shader, const std::string &name,
-                             std::array<SpotLight, NR_SPOT_LIGHTS> &lights);
+    static void setShaderSpotLights(engine::resources::Shader *&shader, const std::string &name,
+                                    std::array<SpotLight, NR_SPOT_LIGHTS> &lights);
 
     std::string_view name() const override;
 

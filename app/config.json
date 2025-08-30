@@ -5,7 +5,7 @@
         "path": "brown_mud/brown_mud.obj"
       },
       "Earth": {
-        "path": "earth3/Earth.obj",
+        "path": "earth/scene.gltf",
         "flip_uvs": true
       },
       "UFO": {
