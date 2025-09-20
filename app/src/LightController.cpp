@@ -32,7 +32,7 @@ void LightController::initialize() {
         }
         updatePoint(
                 PointLight(
-                        Light(lightColor, ambientStrength,
+                        Light(lightColor, 3.0f * ambientStrength,
                               diffuseStrength,
                               specularStrength,
                               1.0f, 0.0f, 0.0, shininess),
@@ -46,13 +46,13 @@ void LightController::initialize() {
         if (i < 2) {
             updateDirectional(
                     DirectionalLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
-                                           1.0f, 0.0f, 1.0f, shininess, false),
+                                           1.0f, 0.0f, 0.0f, shininess, false),
                                      glm::vec3(flipX * 1.0f, -1.0f, 1.0f)),
                     i);
         } else {
             updateDirectional(
                     DirectionalLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
-                                           1.0f, 0.0f, 1.0f, shininess, false),
+                                           1.0f, 0.0f, 0.0f, shininess, false),
                                      glm::vec3(flipX * 1.0f, -1.0f, -1.0f)),
                     i);
         }
@@ -68,7 +68,7 @@ void LightController::initialize() {
             lightColor = glm::vec3(1.0f, 0.0f, 1.0f);
         }
         double angle = 2 * i * M_PI / NR_SPOT_LIGHTS;
-        updateSpot(SpotLight(Light(lightColor, ambientStrength, diffuseStrength, specularStrength,
+        updateSpot(SpotLight(Light(lightColor, 3.0f * ambientStrength, diffuseStrength, specularStrength,
                                    1.0f, 0.0f, 0.0f, shininess),
                              glm::vec3(50.0f * cos(angle), 35.0f,
                                        200.0f - 50.0f * sin(angle)),

@@ -12,8 +12,8 @@ const std::unordered_map<engine::platform::KeyId, engine::graphics::Camera::Move
     return KeyIdToCameraMovement;
 }
 
-static uint32_t gBuffer, rboDepth;
-static std::array<uint32_t, 3> attachments, textureIDs;
+static uint32_t gBuffer;
+static std::array<uint32_t, 3> textureIDs;
 static std::vector<glm::mat4> ufoMatrices;
 static float t = 0.0;
 
@@ -27,7 +27,7 @@ void MainController::initialize() {
     KeyIdToCameraMovement.rehash(engine::graphics::Camera::Movement::MOVEMENT_COUNT);
     initialize_keyid_maps();
     engine::graphics::OpenGL::enable_depth_testing();
-    textureIDs = engine::graphics::OpenGL::generateGbuffer(gBuffer, rboDepth, attachments, window->width(),
+    textureIDs = engine::graphics::OpenGL::generateGbuffer(gBuffer, window->width(),
                                                            window->height());
 //    engine::graphics::OpenGL::enable_antialiasing();
     std::vector<std::pair<float, float>> ufos;
@@ -195,8 +195,9 @@ void MainController::drawEarth() {
     defaultShader->set_mat4("view", graphics->camera()
                                             ->view_matrix());
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 0.0f, -250.0f));
-    model = glm::scale(model, glm::vec3(250.0f));
+    model = glm::translate(model, glm::vec3(0.0f, -450.0f, -300.0f));
+    model = glm::scale(model, glm::vec3(400.0f));
+    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     defaultShader->set_mat4("model", model);
     defaultShader->set_mat3("normalModelMatrix", glm::mat3(glm::transpose(glm::inverse(model))));
     earth->draw(defaultShader);

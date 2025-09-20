@@ -66,6 +66,12 @@ uniform PointLight light[NR_POINT_LIGHTS];
 uniform DirLight dirLight[NR_DIR_LIGHTS];
 uniform SpotLight spotLight[NR_SPOT_LIGHTS];
 
+// TODO UBO
+//layout (std140, binding = 0) uniform Lights {
+//    uniform PointLight light[NR_POINT_LIGHTS];
+//    uniform DirLight dirLight[NR_DIR_LIGHTS];
+//    uniform SpotLight spotLight[NR_SPOT_LIGHTS];
+//};
 uniform vec3 viewPos;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
@@ -127,7 +133,8 @@ void main() {
             }
         }
     }
-    result = min(result, vec3(1.0f));
+    result = vec3(1.0f) - exp(-result);
+    result = pow(result, vec3(2.2f));
     FragColor = vec4(result, 1.0);
 
 }

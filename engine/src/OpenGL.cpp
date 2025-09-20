@@ -195,8 +195,7 @@ void OpenGL::enable_antialiasing() {
     CHECKED_GL_CALL(glEnable, GL_MULTISAMPLE);
 }
 
-std::array<uint32_t, 3> OpenGL::generateGbuffer(uint32_t &gBuffer, uint32_t &rboDepth,
-                                                std::array<uint32_t, 3> &attachments, const int32_t &SCR_WIDTH,
+std::array<uint32_t, 3> OpenGL::generateGbuffer(uint32_t &gBuffer, const int32_t &SCR_WIDTH,
                                                 const int32_t &SCR_HEIGHT) {
     glGenFramebuffers(1, &gBuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
@@ -223,8 +222,8 @@ std::array<uint32_t, 3> OpenGL::generateGbuffer(uint32_t &gBuffer, uint32_t &rbo
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, textureIDs[2], 0);
-
-    attachments = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+    std::array<uint32_t, 3> attachments = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+    uint32_t rboDepth;
     glDrawBuffers(3, &attachments[0]);
     glGenRenderbuffers(1, &rboDepth);
     glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
