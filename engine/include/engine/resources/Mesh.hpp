@@ -49,16 +49,12 @@ public:
 * @param indices The indices in the mesh.
 * @param textures The textures in the mesh.
  */
-
-
     Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices,
          std::vector<Texture *> textures);
 
-    void drawInstance(Shader*& shader, size_t count);
-    void prepareMesh();
+    void drawInstances(Shader *&shader, std::vector<glm::mat4> &modelMatrices);
 
 private:
-
     uint32_t m_vao{0};
     uint32_t m_num_indices{0};
     std::vector<Texture *> m_textures;

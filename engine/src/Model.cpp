@@ -17,21 +17,10 @@ void Model::destroy() {
     }
 }
 
-void Model::prepareInstancing(std::vector<glm::mat4>& modelMatrices, size_t count) {
-    uint32_t buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, count * sizeof(glm::mat4),
-                 &modelMatrices[0], GL_STATIC_DRAW);
-    for (auto& mesh : m_meshes) {
-        mesh.prepareMesh();
-    }
-}
-
-void Model::drawInstances(Shader*& shader, size_t count) {
+void Model::drawInstances(Shader *&shader, std::vector<glm::mat4> &modelMatrices) {
     shader->use();
-    for (auto& mesh : m_meshes) {
-        mesh.drawInstance(shader, count);
+    for (auto &mesh: m_meshes) {
+        mesh.drawInstances(shader, modelMatrices);
     }
 }
 

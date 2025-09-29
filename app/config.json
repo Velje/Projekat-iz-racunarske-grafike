@@ -13,6 +13,9 @@
       },
       "Low_poly_ufo_OBJ": {
         "path": "Low_poly_ufo_OBJ/Low_poly_UFO.obj"
+      },
+      "Platform": {
+        "path": "platform3/untitled.obj"
       }
     }
   },

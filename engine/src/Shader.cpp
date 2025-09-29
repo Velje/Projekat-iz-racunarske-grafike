@@ -1,8 +1,44 @@
 #include <glad/glad.h>
 #include <engine/resources/Shader.hpp>
 #include <engine/graphics/OpenGL.hpp>
+#include <cstring>
 
 namespace engine::resources {
+
+enum uniformBlock : size_t {
+    Matrices,
+    Lights,
+    uniformBlockCount,
+};
+static std::array<uint32_t, uniformBlockCount> uniformBlocks{};
+
+void Shader::setupUBOMatrices(std::vector<glm::mat4> &uboMatrices) {
+    if (!uniformBlocks[Matrices]) {
+        glGenBuffers(1, &uniformBlocks[Matrices]);
+        glBindBuffer(GL_UNIFORM_BUFFER, uniformBlocks[Matrices]);
+        glBufferData(GL_UNIFORM_BUFFER, sizeof(uboMatrices[0]) * uboMatrices.size(), NULL, GL_STATIC_DRAW);
+        glBindBufferBase(GL_UNIFORM_BUFFER, Matrices, uniformBlocks[Matrices]);
+    }
+    glBindBuffer(GL_UNIFORM_BUFFER, uniformBlocks[Matrices]);
+    void *ptr = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+    memcpy(ptr, uboMatrices.data(), sizeof(uboMatrices[0]) * uboMatrices.size());
+    glUnmapBuffer(GL_UNIFORM_BUFFER);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void Shader::setupUBOLights(UBOLights &uboLights) {
+    if (!uniformBlocks[Lights]) {
+        glGenBuffers(1, &uniformBlocks[Lights]);
+        glBindBuffer(GL_UNIFORM_BUFFER, uniformBlocks[Lights]);
+        glBufferData(GL_UNIFORM_BUFFER, sizeof(uboLights), nullptr, GL_STATIC_DRAW);
+        glBindBufferBase(GL_UNIFORM_BUFFER, Lights, uniformBlocks[Lights]);
+    }
+    glBindBuffer(GL_UNIFORM_BUFFER, uniformBlocks[Lights]);
+    void *ptr = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+    memcpy(ptr, &uboLights, sizeof(uboLights));
+    glUnmapBuffer(GL_UNIFORM_BUFFER);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
 
 void Shader::use() const {
     glUseProgram(m_shaderId);

@@ -21,7 +21,7 @@ void initialize_keyid_maps();
 
 void MainController::initialize() {
     auto window = engine::core::Controller::get<engine::platform::PlatformController>()->window();
-    auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
+    auto resources = engine::core::Controller::get<ResourcesController>();
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     platform->register_platform_event_observer(std::make_unique<MainPlatformEventObserver>());
     KeyIdToCameraMovement.rehash(engine::graphics::Camera::Movement::MOVEMENT_COUNT);
@@ -67,25 +67,25 @@ bool MainController::loop() {
 
 void MainController::poll_events() {
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
+    auto &uboLights = LightController::getUBOLightsReference();
     if (platform->key(engine::platform::KeyId::KEY_P)
                 .state() == engine::platform::Key::State::JustPressed) {
-        for (auto &pointLight: LightController::getPointLights()) {
-            LightController::togglePoint(pointLight);
-        }
-    }
-    if (platform->key(engine::platform::KeyId::KEY_O)
-                .state() == engine::platform::Key::State::JustPressed) {
-        for (auto &spotLight: LightController::getSpotLights()) {
-            LightController::toggleSpot(spotLight);
+        for (size_t i = 0; i < NR_POINT_LIGHTS; i++) {
+            LightController::togglePoint(uboLights.pointLights[i]);
         }
     }
     if (platform->key(engine::platform::KeyId::KEY_I)
                 .state() == engine::platform::Key::State::JustPressed) {
-        for (auto &dirLight: LightController::getDirectionalLights()) {
-            LightController::toggleDirectional(dirLight);
+        for (size_t i = 0; i < NR_DIR_LIGHTS; i++) {
+            LightController::toggleDirectional(uboLights.dirLights[i]);
         }
     }
-
+    if (platform->key(engine::platform::KeyId::KEY_O)
+                .state() == engine::platform::Key::State::JustPressed) {
+        for (size_t i = 0; i < NR_SPOT_LIGHTS; i++) {
+            LightController::toggleSpot(uboLights.spotLights[i]);
+        }
+    }
 }
 
 void MainController::update_camera() {
@@ -148,20 +148,20 @@ void MainController::geometryPass() {
     engine::graphics::OpenGL::clear_buffers();
     drawTerrain();
     engine::graphics::OpenGL::enable_backCulling();
+    drawPlatform();
     drawUFO();
     drawUFO2();
     drawEarth();
-//    drawPlatform();
     engine::graphics::OpenGL::bindFrameBuffer(0);
 }
 
 void MainController::lightPass() {
-    auto &spotLights = LightController::getSpotLights();
+    auto &uboLights = LightController::getUBOLightsReference();
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     t += platform->dt() * 2.0f;
     for (uint32_t i = 0; i < NR_SPOT_LIGHTS; i++) {
         float angle = t + 2 * i * M_PI / NR_SPOT_LIGHTS;
-        spotLights[i].position = glm::vec3(50.0f * cos(angle), 35.0f, 200.0f - 50.0f * sin(angle));
+        uboLights.spotLights[i].position = glm::vec3(50.0f * cos(angle), 145.0f, 200.0f - 50.0f * sin(angle));
     }
     LightController::updateLights();
     engine::graphics::OpenGL::activateGbuffertextures(textureIDs);
@@ -169,14 +169,10 @@ void MainController::lightPass() {
 }
 
 void MainController::drawTerrain() {
-    auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
-    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
-    engine::resources::Model *brown_mud = resources->model("brown_mud");
-    engine::resources::Shader *defaultShader = resources->shader("default");
+    auto resources = engine::core::Controller::get<ResourcesController>();
+    Model *brown_mud = resources->model("brown_mud");
+    Shader *defaultShader = resources->shader("default");
     defaultShader->use();
-    defaultShader->set_mat4("projection", graphics->projection_matrix());
-    defaultShader->set_mat4("view", graphics->camera()
-                                            ->view_matrix());
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, 0.0f, 200.0f));
     model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -186,75 +182,58 @@ void MainController::drawTerrain() {
 }
 
 void MainController::drawEarth() {
-    auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
-    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
-    engine::resources::Model *earth = resources->model("Earth");
-    engine::resources::Shader *defaultShader = resources->shader("default");
+    auto resources = engine::core::Controller::get<ResourcesController>();
+    Model *earth = resources->model("Earth");
+    Shader *defaultShader = resources->shader("default");
     defaultShader->use();
-    defaultShader->set_mat4("projection", graphics->projection_matrix());
-    defaultShader->set_mat4("view", graphics->camera()
-                                            ->view_matrix());
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, -450.0f, -300.0f));
-    model = glm::scale(model, glm::vec3(400.0f));
     model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::scale(model, glm::vec3(400.0f));
     defaultShader->set_mat4("model", model);
     defaultShader->set_mat3("normalModelMatrix", glm::mat3(glm::transpose(glm::inverse(model))));
     earth->draw(defaultShader);
 }
 
 void MainController::drawUFO() {
-    auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
-    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
-    engine::resources::Model *ufo_obj = resources->model("UFO");
-    engine::resources::Shader *defaultShader = resources->shader("default");
+    auto resources = engine::core::Controller::get<ResourcesController>();
+    Model *ufo_obj = resources->model("UFO");
+    Shader *defaultShader = resources->shader("default");
     defaultShader->use();
-    defaultShader->set_mat4("projection", graphics->projection_matrix());
-    defaultShader->set_mat4("view", graphics->camera()
-                                            ->view_matrix());
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 25.0f, 200.0f));
+    model = glm::translate(model, glm::vec3(0.0f, 135.0f, 200.0f));
     float angle = t + 2.0f * M_PI / NR_SPOT_LIGHTS;
     model = glm::rotate(model, angle,
                         glm::vec3(0.0f, 1.0f, 0.0f));
     model = glm::scale(model, glm::vec3(20.0f));
-    defaultShader->set_mat3("normalModelMatrix", glm::mat3(glm::transpose(glm::inverse(model))));
     defaultShader->set_mat4("model", model);
+    defaultShader->set_mat3("normalModelMatrix", glm::mat3(glm::transpose(glm::inverse(model))));
     ufo_obj->draw(defaultShader);
 }
 
 void MainController::drawUFO2() {
-    auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
-    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
-    engine::resources::Model *lowpolyUFO = resources->model("Low_poly_ufo_OBJ");
-    engine::resources::Shader *instancingShader = resources->shader("instancing");
+    auto resources = engine::core::Controller::get<ResourcesController>();
+    Model *lowpolyUFO = resources->model("Low_poly_ufo_OBJ");
+    Shader *instancingShader = resources->shader("instancing");
     instancingShader->use();
-    instancingShader->set_mat4("projection", graphics->projection_matrix());
-    instancingShader->set_mat4("view", graphics->camera()
-                                               ->view_matrix());
     instancingShader->set_mat3("normalModelMatrix", glm::mat3(glm::transpose(glm::inverse(ufoMatrices[0]))));
-    lowpolyUFO->prepareInstancing(ufoMatrices, ufoMatrices.size());
-    lowpolyUFO->drawInstances(instancingShader, ufoMatrices.size());
+    lowpolyUFO->drawInstances(instancingShader, ufoMatrices);
 }
 
 void MainController::drawPlatform() {
-    auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
-    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
-    engine::resources::Model *ufo_obj = resources->model("Platform");
-    engine::resources::Shader *ufo_shader = resources->shader("default");
+    auto resources = engine::core::Controller::get<ResourcesController>();
+    Model *ufo_obj = resources->model("Platform");
+    Shader *ufo_shader = resources->shader("default");
     ufo_shader->use();
-    ufo_shader->set_mat4("projection", graphics->projection_matrix());
-    ufo_shader->set_mat4("view", graphics->camera()
-                                         ->view_matrix());
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 12.0f, 0.0f));
+    model = glm::translate(model, glm::vec3(0.0f, 80.0f, 200.0f));
     ufo_shader->set_mat3("normalModelMatrix", glm::mat3(glm::transpose(glm::inverse(model))));
     ufo_shader->set_mat4("model", model);
     ufo_obj->draw(ufo_shader);
 }
 
 void MainController::drawSkybox() {
-    auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
+    auto resources = engine::core::Controller::get<ResourcesController>();
     auto skybox = resources->skybox("skybox220");
     auto shader = resources->shader("skybox");
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
@@ -263,6 +242,10 @@ void MainController::drawSkybox() {
 
 void MainController::begin_draw() {
     engine::graphics::OpenGL::clear_buffers();
+    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+    std::vector<glm::mat4> uboMatrices = {graphics->camera()
+                                                  ->view_matrix(), graphics->projection_matrix()};
+    Shader::setupUBOMatrices(uboMatrices);
 }
 
 void MainController::draw() {

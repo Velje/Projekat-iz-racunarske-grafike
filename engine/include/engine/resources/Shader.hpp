@@ -11,6 +11,48 @@
 #include <glm/glm.hpp>
 
 namespace engine::resources {
+static const size_t NR_POINT_LIGHTS = 64;
+static const size_t NR_DIR_LIGHTS = 4;
+static const size_t NR_SPOT_LIGHTS = 64;
+static const size_t totalLightCount = NR_POINT_LIGHTS + NR_DIR_LIGHTS + NR_SPOT_LIGHTS;
+
+// Base layout for all lights
+struct alignas(16) Light {
+    alignas(16) glm::vec3 color{1.0f};
+    alignas(16) glm::vec3 ambientStrength{1.0f};
+    alignas(16) glm::vec3 diffuseStrength{1.0f};
+    alignas(16) glm::vec3 specularStrength{1.0f};
+    alignas(16) glm::vec4 attenuation{1.0f, 0.0f, 0.0f, 2048.0f};
+    alignas(4) bool enabled;
+};
+
+// Point light
+struct alignas(16) PointLight {
+    Light base;
+    alignas(16) glm::vec3 position;
+};
+
+// Directional light
+struct alignas(16) DirectionalLight {
+    Light base;
+    alignas(16) glm::vec3 direction;
+};
+
+// Spot light
+struct alignas(16) SpotLight {
+    Light base;
+    alignas(16) glm::vec3 position;
+    alignas(16) glm::vec3 direction;
+    alignas(4) float cutOff;
+    alignas(4) float outerCutOff;
+};
+
+struct alignas(16) UBOLights {
+    std::array<PointLight, NR_POINT_LIGHTS> pointLights;
+    std::array<DirectionalLight, NR_DIR_LIGHTS> dirLights;
+    std::array<SpotLight, NR_SPOT_LIGHTS> spotLights;
+};
+
 using ShaderName = std::string;
 
 /**
@@ -127,6 +169,10 @@ public:
     * @returns The path to the source file of the shader program.
     */
     const std::filesystem::path &source_path() const;
+
+    static void setupUBOMatrices(std::vector<glm::mat4> &uboMatrices);
+
+    static void setupUBOLights(UBOLights &uboLights);
 
 private:
     /**

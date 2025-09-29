@@ -30,6 +30,8 @@ private:
 
     void end_draw() override;
 
+    std::string_view name() const override;
+
     void deferredRender();
 
     void drawTerrain();
@@ -37,8 +39,6 @@ private:
     void drawSkybox();
 
     void drawUFO();
-
-    std::string_view name() const override;
 
     void geometryPass();
 

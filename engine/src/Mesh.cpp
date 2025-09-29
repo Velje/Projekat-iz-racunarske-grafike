@@ -6,6 +6,8 @@
 
 namespace engine::resources {
 
+static uint32_t instanceVBO = 0;
+
 Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices,
            std::vector<Texture *> textures) {
     // NOLINTBEGIN
@@ -23,19 +25,36 @@ Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &ind
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), indices.data(), GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) offsetof(Vertex, Position));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                          (void *) offsetof(Vertex, Position));
 
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) offsetof(Vertex, Normal));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                          (void *) offsetof(Vertex, Normal));
 
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) offsetof(Vertex, TexCoords));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                          (void *) offsetof(Vertex, TexCoords));
 
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) offsetof(Vertex, Tangent));
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                          (void *) offsetof(Vertex, Tangent));
 
     glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) offsetof(Vertex, Bitangent));
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                          (void *) offsetof(Vertex, Bitangent));
+
+    if (!instanceVBO) {
+        glGenBuffers(1, &instanceVBO);
+    }
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+    std::size_t v4s = sizeof(glm::vec4);
+    for (uint32_t i = 0; i < 4; i++) {
+        glEnableVertexAttribArray(5 + i);
+        glVertexAttribPointer(5 + i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4),
+                              (void *) (i * v4s));
+        glVertexAttribDivisor(5 + i, 1);
+    }
 
     glBindVertexArray(0);
     // NOLINTEND
@@ -67,25 +86,7 @@ void Mesh::destroy() {
     glDeleteVertexArrays(1, &m_vao);
 }
 
-void Mesh::prepareMesh() {
-    glBindVertexArray(m_vao);
-    std::size_t v4s = sizeof(glm::vec4);
-    glEnableVertexAttribArray(5);
-    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * v4s, (void *) 0);
-    glEnableVertexAttribArray(6);
-    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * v4s, (void *) (1 * v4s));
-    glEnableVertexAttribArray(7);
-    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 4 * v4s, (void *) (2 * v4s));
-    glEnableVertexAttribArray(8);
-    glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, 4 * v4s, (void *) (3 * v4s));
-    glVertexAttribDivisor(5, 1);
-    glVertexAttribDivisor(6, 1);
-    glVertexAttribDivisor(7, 1);
-    glVertexAttribDivisor(8, 1);
-    glBindVertexArray(0);
-}
-
-void Mesh::drawInstance(Shader *&shader, size_t count) {
+void Mesh::drawInstances(Shader *&shader, std::vector<glm::mat4> &modelMatrices) {
     std::unordered_map<std::string_view, uint32_t> counts;
     std::string uniform_name;
     uniform_name.reserve(32);
@@ -100,12 +101,12 @@ void Mesh::drawInstance(Shader *&shader, size_t count) {
         uniform_name.clear();
     }
     glBindVertexArray(m_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+    uint32_t instanceCount = modelMatrices.size();
+    glBufferData(GL_ARRAY_BUFFER, instanceCount * sizeof(glm::mat4),
+                 modelMatrices.data(), GL_STATIC_DRAW);
     glDrawElementsInstanced(GL_TRIANGLES,
-                            m_num_indices, GL_UNSIGNED_INT, 0, count);
-    glVertexAttribDivisor(5, 0);
-    glVertexAttribDivisor(6, 0);
-    glVertexAttribDivisor(7, 0);
-    glVertexAttribDivisor(8, 0);
+                            m_num_indices, GL_UNSIGNED_INT, 0, instanceCount);
     glBindVertexArray(0);
 }
 

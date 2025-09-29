@@ -4,6 +4,10 @@
 
 namespace app {
 
+static UBOLights *uboLights = LightController::getUBOLightsAddress();
+static LightAttributes *lightAttributes = LightController::getLightAttributesAddress();
+static int pointSelector = 0, dirSelector = 0, spotSelector = 0;
+
 void GUIController::initialize() {
     set_enable(false);
 }
@@ -45,32 +49,55 @@ void GUIController::draw() {
     ImGui::Text("Frames per second: %f", 1 / deltaTime);
     ImGui::Text("Frame difference: %fms", deltaTime * 1000);
     ImGui::Text("Light control");
-    ImGui::ColorEdit3("color", glm::value_ptr(lightColor));
-    ImGui::DragFloat3("ambientStrength", glm::value_ptr(ambientStrength), 20.0f, 0.0f, 10000.0f);
-    ImGui::DragFloat3("diffuseStrength", glm::value_ptr(diffuseStrength), 20.0f, 0.0f, 10000.0f);
-    ImGui::DragFloat3("specularStrength", glm::value_ptr(specularStrength), 20.0f, 0.0f, 10000.0f);
-    ImGui::DragFloat("shininess", &shininess, 2.0f, 0.0f, 2048.0f);
-    for (auto &pointLight: LightController::getPointLights()) {
-        pointLight.color = lightColor;
-        pointLight.ambientStrength = ambientStrength;
-        pointLight.diffuseStrength = diffuseStrength;
-        pointLight.specularStrength = specularStrength;
-        pointLight.shininess = shininess;
+    ImGui::InputInt("Pointlight index", &pointSelector);
+    if (pointSelector >= 0 && pointSelector < NR_POINT_LIGHTS) {
+        auto &pointLight = uboLights->pointLights[pointSelector];
+        ImGui::ColorEdit3("Point light color", glm::value_ptr(pointLight.base
+                                                                        .color));
+        ImGui::DragFloat3("ambientStrength1", glm::value_ptr(pointLight.base
+                                                                       .ambientStrength), 0.5f, 0.0f, 100.0f);
+        ImGui::DragFloat3("diffuseStrength1", glm::value_ptr(pointLight.base
+                                                                       .diffuseStrength), 0.5f, 0.0f, 100.0f);
+        ImGui::DragFloat3("specularStrength1", glm::value_ptr(pointLight.base
+                                                                        .specularStrength), 0.5f, 0.0f, 100.0f);
+        ImGui::DragFloat("shininess1", &pointLight.base
+                                                  .attenuation
+                                                  .w, 1.0f, 0.0f, 100.0f);
     }
-    for (auto &dirLight: LightController::getDirectionalLights()) {
-        dirLight.color = lightColor;
-        dirLight.ambientStrength = ambientStrength;
-        dirLight.diffuseStrength = diffuseStrength;
-        dirLight.specularStrength = specularStrength;
-        dirLight.shininess = shininess;
+
+    ImGui::InputInt("Dirlight index", &dirSelector);
+    if (dirSelector >= 0 && dirSelector < NR_DIR_LIGHTS) {
+        auto &dirLight = uboLights->dirLights[dirSelector];
+        ImGui::ColorEdit3("Directional light color", glm::value_ptr(dirLight.base
+                                                                            .color));
+        ImGui::DragFloat3("ambientStrength2", glm::value_ptr(dirLight.base
+                                                                     .ambientStrength), 0.5f, 0.0f, 100.0f);
+        ImGui::DragFloat3("diffuseStrength2", glm::value_ptr(dirLight.base
+                                                                     .diffuseStrength), 0.5f, 0.0f, 100.0f);
+        ImGui::DragFloat3("specularStrength2", glm::value_ptr(dirLight.base
+                                                                      .specularStrength), 0.5f, 0.0f, 100.0f);
+        ImGui::DragFloat("shininess2", &dirLight.base
+                                                .attenuation
+                                                .w, 1.0f, 0.0f, 2048.0f);
     }
-    for (auto &spotLight: LightController::getSpotLights()) {
-        spotLight.color = lightColor;
-        spotLight.ambientStrength = ambientStrength;
-        spotLight.diffuseStrength = diffuseStrength;
-        spotLight.specularStrength = specularStrength;
-        spotLight.shininess = shininess;
+
+    ImGui::InputInt("Spotlight index", &spotSelector);
+    if (spotSelector >= 0 && spotSelector < NR_SPOT_LIGHTS) {
+        auto &spotLight = uboLights->spotLights[spotSelector];
+        ImGui::ColorEdit3("Spotlight color", glm::value_ptr(spotLight.base
+                                                                     .color));
+        ImGui::DragFloat3("ambientStrength3", glm::value_ptr(spotLight.base
+                                                                      .ambientStrength), 0.5f, 0.0f, 100.0f);
+        ImGui::DragFloat3("diffuseStrength3", glm::value_ptr(spotLight.base
+                                                                      .diffuseStrength), 0.5f, 0.0f, 100.0f);
+        ImGui::DragFloat3("specularStrength3", glm::value_ptr(spotLight.base
+                                                                       .specularStrength), 0.5f, 0.0f, 100.0f);
+        ImGui::DragFloat("shininess3", &spotLight.base
+                                                 .attenuation
+                                                 .w, 1.0f, 0.0f, 2048.0f);
     }
+    ImGui::DragFloat("exposure", &lightAttributes->exposure, 0.25f, 0.0f, 100.0f);
+    ImGui::DragFloat("gamma", &lightAttributes->gamma, 0.25f, 0.0f, 100.0f);
     ImGui::End();
     graphics->end_gui();
 }

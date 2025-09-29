@@ -16,66 +16,49 @@ void main() {
 out vec4 FragColor;
 in vec3 FragPos;
 in vec2 TexCoords;
-in vec3 Normal;
+
+struct Light {
+    vec3 color; // 16
+    vec3 ambientStrength; //16
+    vec3 diffuseStrength; // 16
+    vec3 specularStrength; // 16
+    vec4 attenuation; // 16
+    bool enabled; // 4 + 12
+}; // 96B
 
 struct PointLight {
-    vec3 position;
-    vec3 color;
-    vec3 ambientStrength;
-    vec3 diffuseStrength;
-    vec3 specularStrength;
-    float constant;
-    float linear;
-    float quadratic;
-    float shininess;
-    bool enabled;
-};
+    Light base; // 96
+    vec3 position; // 16
+}; // 112B
+
 struct DirLight {
-    vec3 direction;
-    vec3 color;
-    vec3 ambientStrength;
-    vec3 diffuseStrength;
-    vec3 specularStrength;
-    float constant;
-    float linear;
-    float quadratic;
-    float shininess;
-    bool enabled;
-};
+    Light base; // 96
+    vec3 direction; // 16
+}; // 112B
 
 struct SpotLight {
-    vec3 position;
-    vec3 direction;
-    vec3 color;
-    vec3 ambientStrength;
-    vec3 diffuseStrength;
-    vec3 specularStrength;
-    float constant;
-    float linear;
-    float quadratic;
-    float shininess;
-    float outcutOff;
-    float cutOff;
-    bool enabled;
-};
+    Light base; // 96
+    vec3 position; // 16
+    vec3 direction; // 16
+    float cutOff; // 4
+    float outcutOff; // 4 + 8
+}; // 144B
 
 #define NR_POINT_LIGHTS 64
 #define NR_DIR_LIGHTS 4
-#define NR_SPOT_LIGHTS 16
-uniform PointLight light[NR_POINT_LIGHTS];
-uniform DirLight dirLight[NR_DIR_LIGHTS];
-uniform SpotLight spotLight[NR_SPOT_LIGHTS];
+#define NR_SPOT_LIGHTS 64
 
-// TODO UBO
-//layout (std140, binding = 0) uniform Lights {
-//    uniform PointLight light[NR_POINT_LIGHTS];
-//    uniform DirLight dirLight[NR_DIR_LIGHTS];
-//    uniform SpotLight spotLight[NR_SPOT_LIGHTS];
-//};
+layout (std140, binding = 1) uniform Lights {
+    PointLight light[NR_POINT_LIGHTS]; // 112B * 256
+    DirLight dirLight[NR_DIR_LIGHTS]; // 112B * 4
+    SpotLight spotLight[NR_SPOT_LIGHTS]; // 144B * 64
+}; // 38336B
+
 uniform vec3 viewPos;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
+uniform float exposure, gamma;
 
 float calculateDiffuse(vec3 modelNormal, vec3 lightDir) {
     return max(dot(modelNormal, lightDir), 0.0f);
@@ -88,53 +71,64 @@ float calculateSpecular(vec3 viewDir, vec3 reflectDir, float shininess) {
 void main() {
     vec3 FragPos = texture(gPosition, TexCoords).rgb;
     vec3 viewDir = normalize(viewPos - FragPos);
-    vec3 modelNormal = texture(gNormal, TexCoords).rgb;
-    vec3 modelDiffuse = texture(gAlbedoSpec, TexCoords).rgb;
-    float modelSpecular = texture(gAlbedoSpec, TexCoords).a;
+    vec3 modelNormal = normalize(texture(gNormal, TexCoords).rgb * 2.0f - 1.0f);
+    vec4 albedoSpec = texture(gAlbedoSpec, TexCoords);
+    vec3 modelDiffuse = albedoSpec.rgb;
+    float modelSpecular = albedoSpec.a;
     vec3 result = vec3(0.0f);
     for (uint i = 0; i < NR_POINT_LIGHTS; i++) {
-        if (light[i].enabled) {
+        if (light[i].base.enabled) {
             vec3 lightDir = normalize(light[i].position - FragPos);
             vec3 reflectDir = reflect(-lightDir, modelNormal);
-            vec3 ambient = light[i].ambientStrength * light[i].color * modelDiffuse;
-            vec3 diffuse = light[i].diffuseStrength * calculateDiffuse(modelNormal, lightDir) * light[i].color * modelDiffuse;
-            vec3 specular = light[i].specularStrength * calculateSpecular(viewDir, reflectDir, light[i].shininess) * light[i].color * modelSpecular;
+            vec3 ambient = light[i].base.ambientStrength * light[i].base.color * modelDiffuse;
+            vec3 diffuse = light[i].base.diffuseStrength * calculateDiffuse(modelNormal, lightDir)
+            * light[i].base.color * modelDiffuse;
+            vec3 specular = light[i].base.specularStrength * calculateSpecular(viewDir, reflectDir, light[i].base.attenuation.w)
+            * light[i].base.color * modelSpecular;
             float distance = length(light[i].position - FragPos);
-            if (distance <= 15.0f) {
-                result += (ambient + diffuse + specular) / (light[i].constant + light[i].linear * distance + light[i].quadratic * distance * distance);
+            if (distance <= 10.0f) {
+                result += ambient + (diffuse + specular) /
+                (light[i].base.attenuation.x + light[i].base.attenuation.y * distance
+                + light[i].base.attenuation.z * distance * distance);
             }
         }
     }
     for (uint i = 0; i < NR_DIR_LIGHTS; i++) {
-        if (dirLight[i].enabled) {
-            vec3 lightDir = normalize(dirLight[i].direction);
-            vec3 reflectDir = reflect(lightDir, modelNormal);
-            vec3 ambient = dirLight[i].ambientStrength * dirLight[i].color * modelDiffuse;
-            vec3 diffuse = dirLight[i].diffuseStrength * calculateDiffuse(modelDiffuse, lightDir) * dirLight[i].color * modelDiffuse;
-            vec3 specular = dirLight[i].specularStrength * calculateSpecular(lightDir, reflectDir, dirLight[i].shininess) * dirLight[i].color * modelSpecular;
-            float distance = length(dirLight[i].direction);
-            result += (ambient + diffuse + specular) / (dirLight[i].constant + dirLight[i].linear * distance + dirLight[i].quadratic * distance * distance);
+        if (dirLight[i].base.enabled) {
+            vec3 lightDir = normalize(-dirLight[i].direction);
+            vec3 reflectDir = reflect(-lightDir, modelNormal);
+            vec3 ambient = dirLight[i].base.ambientStrength * dirLight[i].base.color * modelDiffuse;
+            vec3 diffuse = dirLight[i].base.diffuseStrength * calculateDiffuse(modelNormal, lightDir)
+            * dirLight[i].base.color * modelDiffuse;
+            vec3 specular = dirLight[i].base.specularStrength *
+            calculateSpecular(viewDir, reflectDir, dirLight[i].base.attenuation.w) *
+            dirLight[i].base.color * modelSpecular;
+            result += ambient + (diffuse + specular) / (dirLight[i].base.attenuation.x +
+            dirLight[i].base.attenuation.y + dirLight[i].base.attenuation.z);
         }
     }
     for (uint i = 0; i < NR_SPOT_LIGHTS; i++) {
-        if (spotLight[i].enabled) {
+        if (spotLight[i].base.enabled) {
             vec3 lightDir = normalize(spotLight[i].position - FragPos);
             float theta = dot(lightDir, normalize(-spotLight[i].direction));
             float epsilon = spotLight[i].cutOff - spotLight[i].outcutOff;
             float intensity = clamp((theta - spotLight[i].outcutOff) / epsilon, 0.0f, 1.0f);
-            vec3 viewDir = normalize(viewPos - FragPos);
             vec3 reflectDir = reflect(-lightDir, modelNormal);
-            vec3 ambient = intensity * spotLight[i].ambientStrength * spotLight[i].color * modelDiffuse;
-            vec3 diffuse = intensity * spotLight[i].diffuseStrength * calculateDiffuse(modelDiffuse, lightDir) * spotLight[i].color * modelDiffuse;
-            vec3 specular = intensity * spotLight[i].specularStrength * calculateSpecular(viewDir, reflectDir, spotLight[i].shininess) * spotLight[i].color * modelSpecular;
+            vec3 ambient = intensity * spotLight[i].base.ambientStrength * spotLight[i].base.color * modelDiffuse;
+            vec3 diffuse = intensity * spotLight[i].base.diffuseStrength * calculateDiffuse(modelNormal, lightDir) *
+            spotLight[i].base.color * modelDiffuse;
+            vec3 specular = intensity * spotLight[i].base.specularStrength * calculateSpecular(viewDir, reflectDir, spotLight[i].base.attenuation.w)
+            * spotLight[i].base.color * modelSpecular;
             float distance = length(spotLight[i].position - FragPos);
-            if (distance <= 50.0f) {
-                result += (ambient + diffuse + specular) / (spotLight[i].constant + spotLight[i].linear * distance + spotLight[i].quadratic * distance * distance);
+            if (distance <= 146.0f) {
+                result += ambient + (diffuse + specular) /
+                (spotLight[i].base.attenuation.x + spotLight[i].base.attenuation.y * distance +
+                spotLight[i].base.attenuation.z * distance * distance);
             }
         }
     }
-    result = vec3(1.0f) - exp(-result);
-    result = pow(result, vec3(2.2f));
+    result = vec3(1.0f) - exp(-result * exposure);
+    result = pow(result, vec3(gamma));
     FragColor = vec4(result, 1.0);
 
 }

@@ -26,17 +26,11 @@ public:
     void draw(const Shader *shader);
 
     /**
-    * @brief Use when drawing a lot of models at once.
-    * @param modelMatrices Model matrix for each instance.
-    * @param count Number of model draws to prepare for.
+    * @brief Use for instanced drawing.
+    * @param shader Adequate shader prepared for 5 6 7 8.
+    * @param modelMatrices Models to use for every instance.
     */
-    void prepareInstancing(std::vector<glm::mat4>& modelMatrices, size_t count);
-    /**
-    * @brief Use after instancing preparation.
-    * @param shader Adequate shader relative to preparation.
-    * @param count Number of model draws that we have prepared for.
-    */
-    void drawInstances(Shader*& shader, size_t count);
+    void drawInstances(Shader *&shader, std::vector<glm::mat4> &modelMatrices);
 
     /**
     * @brief Destroys the model in the OpenGL context.
