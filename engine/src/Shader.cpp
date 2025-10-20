@@ -16,7 +16,7 @@ void Shader::setupUBOMatrices(std::vector<glm::mat4> &uboMatrices) {
     if (!uniformBlocks[Matrices]) {
         glGenBuffers(1, &uniformBlocks[Matrices]);
         glBindBuffer(GL_UNIFORM_BUFFER, uniformBlocks[Matrices]);
-        glBufferData(GL_UNIFORM_BUFFER, sizeof(uboMatrices[0]) * uboMatrices.size(), NULL, GL_STATIC_DRAW);
+        glBufferData(GL_UNIFORM_BUFFER, sizeof(uboMatrices[0]) * uboMatrices.size(), NULL, GL_STREAM_DRAW);
         glBindBufferBase(GL_UNIFORM_BUFFER, Matrices, uniformBlocks[Matrices]);
     }
     glBindBuffer(GL_UNIFORM_BUFFER, uniformBlocks[Matrices]);
@@ -30,13 +30,30 @@ void Shader::setupUBOLights(UBOLights &uboLights) {
     if (!uniformBlocks[Lights]) {
         glGenBuffers(1, &uniformBlocks[Lights]);
         glBindBuffer(GL_UNIFORM_BUFFER, uniformBlocks[Lights]);
-        glBufferData(GL_UNIFORM_BUFFER, sizeof(uboLights), nullptr, GL_STATIC_DRAW);
+        glBufferData(GL_UNIFORM_BUFFER, sizeof(uboLights), nullptr, GL_STREAM_DRAW);
         glBindBufferBase(GL_UNIFORM_BUFFER, Lights, uniformBlocks[Lights]);
     }
     glBindBuffer(GL_UNIFORM_BUFFER, uniformBlocks[Lights]);
     void *ptr = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
     memcpy(ptr, &uboLights, sizeof(uboLights));
     glUnmapBuffer(GL_UNIFORM_BUFFER);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void Shader::updateLights(UBOLights &uboLights) {
+    glBindBuffer(GL_UNIFORM_BUFFER, uniformBlocks[Lights]);
+    size_t offsetLight = sizeof(PointLight);
+    size_t offsetPos = sizeof(Light);
+    for (size_t i = 0; i < NR_POINT_LIGHTS; i++) {
+        glBufferSubData(GL_UNIFORM_BUFFER, i * offsetLight + offsetPos, sizeof(glm::vec3),
+                        &uboLights.pointLights[i].position);
+    }
+    offsetLight = sizeof(SpotLight);
+    size_t offsetToSpotlights = sizeof(PointLight) * NR_POINT_LIGHTS + sizeof(DirectionalLight) * NR_DIR_LIGHTS;
+    for (size_t i = 0; i < NR_SPOT_LIGHTS; i++) {
+        glBufferSubData(GL_UNIFORM_BUFFER, offsetToSpotlights + i * offsetLight + offsetPos, sizeof(glm::vec3),
+                        &uboLights.spotLights[i].position);
+    }
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 

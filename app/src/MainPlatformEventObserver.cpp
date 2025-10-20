@@ -4,6 +4,7 @@
 #include <MainController.hpp>
 
 namespace app {
+
 void MainPlatformEventObserver::on_mouse_move(engine::platform::MousePosition position) {
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     float actionStart = platform->getGlfwTime();
@@ -14,9 +15,8 @@ void MainPlatformEventObserver::on_mouse_move(engine::platform::MousePosition po
         float eventStart = platform->getGlfwTime();
         camera->rotate_camera(position.dx, position.dy);
         float eventEnd = platform->getGlfwTime();
-        auto eventController = engine::core::Controller::get<EventController>();
-        eventController->notify(Action(Actions::MOVE, actionEnd - actionStart, EventA::MOUSE,
-                                       eventEnd - eventStart, EventB::CAMERA_ROTATION));
+        EventController::instaLog(Action(Actions::MOVE, actionEnd - actionStart, EventA::MOUSE,
+                                         eventEnd - eventStart, EventB::CAMERA_ROTATION));
     }
 
 }
@@ -31,19 +31,25 @@ void MainPlatformEventObserver::on_scroll(engine::platform::MousePosition positi
         float eventStart = platform->getGlfwTime();
         camera->zoom(position.scroll);
         float eventEnd = platform->getGlfwTime();
-        auto eventController = engine::core::Controller::get<EventController>();
-        eventController->notify(Action(Actions::SCROLL, actionEnd - actionStart, EventA::MOUSE,
-                                       eventEnd - eventStart, EventB::CAMERA_ZOOM));
+        EventController::instaLog(Action(Actions::SCROLL, actionEnd - actionStart, EventA::MOUSE,
+                                         eventEnd - eventStart, EventB::CAMERA_ZOOM));
     }
 }
 
 void MainPlatformEventObserver::on_key(engine::platform::Key key) {
+    auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
+    float actionStart = platform->getGlfwTime();
     auto guiController = engine::core::Controller::get<GUIController>();
+    auto &controls = MainController::getKeyControls();
     if (!guiController->is_enabled()) {
-        auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
-//        auto keyIdToCameraMovement = MainController::getKeyIdToCameraMovement();
-//        if (keyIdToCameraMovement.contains(key.id())) {
-//        }
+        float actionEnd = platform->getGlfwTime();
+        float eventStart = platform->getGlfwTime();
+        if (controls.find(key.id()) == end(controls)) {
+            spdlog::info("{0} is not supported.", key.name());
+            float eventEnd = platform->getGlfwTime();
+            EventController::instaLog(Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY,
+                                             eventEnd - eventStart, EventB::NOTHING_B));
+        }
     }
 }
 

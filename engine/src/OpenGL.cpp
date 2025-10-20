@@ -277,12 +277,12 @@ void OpenGL::renderScreen() {
 }
 
 void OpenGL::enable_backCulling() {
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+    CHECKED_GL_CALL(glEnable, GL_CULL_FACE);
+    CHECKED_GL_CALL(glCullFace, GL_BACK);
 }
 
 void OpenGL::disable_culling() {
-    glDisable(GL_CULL_FACE);
+    CHECKED_GL_CALL(glDisable, GL_CULL_FACE);
 }
 
 uint32_t face_index(std::string_view name) {

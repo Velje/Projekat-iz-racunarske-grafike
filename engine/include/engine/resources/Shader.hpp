@@ -17,37 +17,38 @@ static const size_t NR_SPOT_LIGHTS = 64;
 static const size_t totalLightCount = NR_POINT_LIGHTS + NR_DIR_LIGHTS + NR_SPOT_LIGHTS;
 
 // Base layout for all lights
-struct alignas(16) Light {
+struct Light {
     alignas(16) glm::vec3 color{1.0f};
+    float enabled = false;
     alignas(16) glm::vec3 ambientStrength{1.0f};
     alignas(16) glm::vec3 diffuseStrength{1.0f};
     alignas(16) glm::vec3 specularStrength{1.0f};
-    alignas(16) glm::vec4 attenuation{1.0f, 0.0f, 0.0f, 2048.0f};
-    alignas(4) bool enabled;
+    alignas(16) glm::vec3 attenuation{1.0f, 0.0f, 0.0f};
+    float shininess = 2048.0f;
 };
 
 // Point light
-struct alignas(16) PointLight {
+struct PointLight {
     Light base;
     alignas(16) glm::vec3 position;
 };
 
 // Directional light
-struct alignas(16) DirectionalLight {
+struct DirectionalLight {
     Light base;
     alignas(16) glm::vec3 direction;
 };
 
 // Spot light
-struct alignas(16) SpotLight {
+struct SpotLight {
     Light base;
     alignas(16) glm::vec3 position;
     alignas(16) glm::vec3 direction;
-    alignas(4) float cutOff;
-    alignas(4) float outerCutOff;
+    float cutOff;
+    float outerCutOff;
 };
 
-struct alignas(16) UBOLights {
+struct UBOLights {
     std::array<PointLight, NR_POINT_LIGHTS> pointLights;
     std::array<DirectionalLight, NR_DIR_LIGHTS> dirLights;
     std::array<SpotLight, NR_SPOT_LIGHTS> spotLights;
@@ -173,6 +174,8 @@ public:
     static void setupUBOMatrices(std::vector<glm::mat4> &uboMatrices);
 
     static void setupUBOLights(UBOLights &uboLights);
+
+    static void updateLights(UBOLights &uboLights);
 
 private:
     /**

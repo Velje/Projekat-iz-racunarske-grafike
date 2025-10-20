@@ -16,7 +16,7 @@ newmtl UFO_texture
 	map_Kd ufo_diffuse.png
 	map_Ke ufo_diffuse_glow.png
 	map_d ufo_diffuse.png
-	map_bump -bm 0.250000 Map__7_Normal_Bump.tga
+	map_Kn Map__7_Normal_Bump.tga
 
 newmtl UFO_texture2
 	Ns 9.999999
@@ -32,3 +32,4 @@ newmtl UFO_texture2
 	map_Ka ufo_diffuse2.png
 	map_Kd ufo_diffuse2.png
 	map_Ke ufo_diffuse2_glow.png
+    map_Kn ufo_normal.png

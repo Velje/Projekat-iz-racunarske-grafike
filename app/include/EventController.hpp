@@ -2,6 +2,7 @@
 #define EVENTCONTROLLER_HPP
 
 #include <engine/core/Controller.hpp>
+#include <engine/platform/PlatformController.hpp>
 #include <spdlog/spdlog.h>
 
 namespace app {
@@ -16,7 +17,7 @@ enum Actions {
 
 enum EventA {
     MOUSE = ACTIONS_COUNT,
-    KEYBOARD,
+    KEY,
     NOTHING_A,
     EVENTA_COUNT
 };
@@ -27,7 +28,11 @@ enum EventB {
     CAMERA_ZOOM,
     CAMERA_SPEED_INCREASED,
     CAMERA_SPEED_STANDARD,
-    CAMERA_SPEED_DECREASED,
+    LIGHTS_TOGGLE_POINT,
+    LIGHTS_TOGGLE_DIR,
+    LIGHTS_TOGGLE_SPOTLIGHT,
+    MODEL_POSITION,
+    MODEL_TOGGLE_NORMALS,
     GUI_TOGGLE,
     NOTHING_B,
     EVENTB_COUNT
@@ -47,9 +52,9 @@ public:
 class EventController : public engine::core::Controller {
 public:
 
-    static void notify(Action action);
+    static void notify(Action &&action);
 
-    static void instaLog(Action action);
+    static void instaLog(Action &&action);
 
     static std::string_view actionsString(Actions &action);
 

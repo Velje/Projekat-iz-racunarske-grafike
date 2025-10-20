@@ -18,41 +18,42 @@ in vec3 FragPos;
 in vec2 TexCoords;
 
 struct Light {
-    vec3 color; // 16
-    vec3 ambientStrength; //16
+    vec3 color; //  12
+    bool enabled; // 4
+    vec3 ambientStrength; // 16
     vec3 diffuseStrength; // 16
     vec3 specularStrength; // 16
-    vec4 attenuation; // 16
-    bool enabled; // 4 + 12
-}; // 96B
+    vec3 attenuation; // 12
+    float shininess; // 4
+}; // 80B
 
 struct PointLight {
-    Light base; // 96
-    vec3 position; // 16
-}; // 112B
+    Light base; // 80B
+    vec3 position; // 16B
+}; // 96B
 
 struct DirLight {
-    Light base; // 96
-    vec3 direction; // 16
-}; // 112B
+    Light base; // 80B
+    vec3 direction; // 16B
+}; // 96B
 
 struct SpotLight {
-    Light base; // 96
+    Light base; // 80B
     vec3 position; // 16
-    vec3 direction; // 16
+    vec3 direction; // 12
     float cutOff; // 4
-    float outcutOff; // 4 + 8
-}; // 144B
+    float outcutOff; // 16
+}; // 128B
 
 #define NR_POINT_LIGHTS 64
 #define NR_DIR_LIGHTS 4
 #define NR_SPOT_LIGHTS 64
 
 layout (std140, binding = 1) uniform Lights {
-    PointLight light[NR_POINT_LIGHTS]; // 112B * 256
-    DirLight dirLight[NR_DIR_LIGHTS]; // 112B * 4
-    SpotLight spotLight[NR_SPOT_LIGHTS]; // 144B * 64
-}; // 38336B
+    PointLight light[NR_POINT_LIGHTS]; // 96B * 64
+    DirLight dirLight[NR_DIR_LIGHTS]; // 96B * 4
+    SpotLight spotLight[NR_SPOT_LIGHTS]; // 128B * 64
+}; // 14720B
 
 uniform vec3 viewPos;
 uniform sampler2D gPosition;
@@ -83,7 +84,7 @@ void main() {
             vec3 ambient = light[i].base.ambientStrength * light[i].base.color * modelDiffuse;
             vec3 diffuse = light[i].base.diffuseStrength * calculateDiffuse(modelNormal, lightDir)
             * light[i].base.color * modelDiffuse;
-            vec3 specular = light[i].base.specularStrength * calculateSpecular(viewDir, reflectDir, light[i].base.attenuation.w)
+            vec3 specular = light[i].base.specularStrength * calculateSpecular(viewDir, reflectDir, light[i].base.shininess)
             * light[i].base.color * modelSpecular;
             float distance = length(light[i].position - FragPos);
             if (distance <= 10.0f) {
@@ -101,7 +102,7 @@ void main() {
             vec3 diffuse = dirLight[i].base.diffuseStrength * calculateDiffuse(modelNormal, lightDir)
             * dirLight[i].base.color * modelDiffuse;
             vec3 specular = dirLight[i].base.specularStrength *
-            calculateSpecular(viewDir, reflectDir, dirLight[i].base.attenuation.w) *
+            calculateSpecular(viewDir, reflectDir, dirLight[i].base.shininess) *
             dirLight[i].base.color * modelSpecular;
             result += ambient + (diffuse + specular) / (dirLight[i].base.attenuation.x +
             dirLight[i].base.attenuation.y + dirLight[i].base.attenuation.z);
@@ -117,10 +118,10 @@ void main() {
             vec3 ambient = intensity * spotLight[i].base.ambientStrength * spotLight[i].base.color * modelDiffuse;
             vec3 diffuse = intensity * spotLight[i].base.diffuseStrength * calculateDiffuse(modelNormal, lightDir) *
             spotLight[i].base.color * modelDiffuse;
-            vec3 specular = intensity * spotLight[i].base.specularStrength * calculateSpecular(viewDir, reflectDir, spotLight[i].base.attenuation.w)
+            vec3 specular = intensity * spotLight[i].base.specularStrength * calculateSpecular(viewDir, reflectDir, spotLight[i].base.shininess)
             * spotLight[i].base.color * modelSpecular;
             float distance = length(spotLight[i].position - FragPos);
-            if (distance <= 146.0f) {
+            if (distance <= 151.0f) {
                 result += ambient + (diffuse + specular) /
                 (spotLight[i].base.attenuation.x + spotLight[i].base.attenuation.y * distance +
                 spotLight[i].base.attenuation.z * distance * distance);

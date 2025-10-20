@@ -167,7 +167,6 @@ private:
     */
     static void assert_no_error(std::source_location location);
 
-
 };
 }
 #endif //OPENGL_HPP

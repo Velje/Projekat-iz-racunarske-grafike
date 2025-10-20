@@ -9,11 +9,14 @@
 #include <spdlog/spdlog.h>
 
 namespace app {
+
+using namespace engine::graphics;
+
 class MainController : public engine::core::Controller {
 public:
     static void update_camera();
 
-    static const std::unordered_map<engine::platform::KeyId, engine::graphics::Camera::Movement> &getKeyIdToCameraMovement();
+    static const std::unordered_set<engine::platform::KeyId> &getKeyControls();
 
 private:
     void initialize() override;
@@ -34,21 +37,26 @@ private:
 
     void deferredRender();
 
-    void drawTerrain();
-
-    void drawSkybox();
-
-    void drawUFO();
-
     void geometryPass();
-
-    void lightPass();
 
     void drawEarth();
 
     void drawPlatform();
 
+    void drawTerrain();
+
+    void drawUFO();
+
+    void drawUFONormals();
+
     void drawUFO2();
+
+    void lightPass();
+
+    void drawSkybox();
+
+    static void updateModelPosition(glm::mat4 &model, Camera::Movement &direction);
+
 };
 }
 #endif //MAINCONTROLLER_HPP

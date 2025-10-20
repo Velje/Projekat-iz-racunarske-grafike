@@ -1,0 +1,15 @@
+keyControls = {
+    engine::platform::KeyId::KEY_P,
+    engine::platform::KeyId::KEY_I,
+    engine::platform::KeyId::KEY_O,
+    engine::platform::KeyId::KEY_N,
+    engine::platform::KeyId::KEY_F2,
+    engine::platform::KeyId::KEY_ENTER,
+    engine::platform::KeyId::KEY_SPACE,
+    engine::platform::KeyId::KEY_ESCAPE,
+    engine::platform::KeyId::KEY_LEFT_SHIFT,
+};
+
+for (auto &pair: KeyIdToCameraMovement) {
+    keyControls.emplace(pair.first);
+}

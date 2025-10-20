@@ -18,13 +18,11 @@ using namespace engine::resources;
 class LightController : public engine::core::Controller {
 public:
 
-    static LightAttributes *getLightAttributesAddress();
-
     static LightAttributes &getLightAttributesReference();
 
-    static UBOLights *getUBOLightsAddress();
-
     static UBOLights &getUBOLightsReference();
+
+    static std::vector<std::pair<float, float>> &getLightPositions();
 
     static void togglePoint(PointLight &light);
 

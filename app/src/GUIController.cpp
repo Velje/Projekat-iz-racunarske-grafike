@@ -4,8 +4,8 @@
 
 namespace app {
 
-static UBOLights *uboLights = LightController::getUBOLightsAddress();
-static LightAttributes *lightAttributes = LightController::getLightAttributesAddress();
+static UBOLights &uboLights = LightController::getUBOLightsReference();
+static LightAttributes &lightAttributes = LightController::getLightAttributesReference();
 static int pointSelector = 0, dirSelector = 0, spotSelector = 0;
 
 void GUIController::initialize() {
@@ -22,22 +22,22 @@ void GUIController::poll_events() {
         auto actionEnd = platform->getGlfwTime();
         auto eventStart = platform->getGlfwTime();
         eventController->set_enable(!eventController->is_enabled());
+        Shader::setupUBOLights(uboLights);
+        set_enable(!is_enabled());
         auto eventEnd = platform->getGlfwTime();
         EventController::instaLog(
-                Action(Actions::PRESS, actionEnd - actionStart, EventA::KEYBOARD, eventEnd - eventStart,
+                Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
                        EventB::GUI_TOGGLE));
-        set_enable(!is_enabled());
     }
 }
 
 void GUIController::draw() {
-    auto light = engine::core::Controller::get<LightController>();
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
-    auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
     auto camera = graphics->camera();
     graphics->begin_gui();
-    ImGui::Begin("Camera info");
+    ImGui::Begin("GUI");
+    ImGui::Text("Camera info");
     ImGui::Text("Camera position: (%f, %f, %f)", camera->Position
                                                        .x, camera->Position
                                                                  .y, camera->Position
@@ -51,7 +51,13 @@ void GUIController::draw() {
     ImGui::Text("Light control");
     ImGui::InputInt("Pointlight index", &pointSelector);
     if (pointSelector >= 0 && pointSelector < NR_POINT_LIGHTS) {
-        auto &pointLight = uboLights->pointLights[pointSelector];
+        auto &pointLight = uboLights.pointLights[pointSelector];
+        if (ImGui::RadioButton("Enabled1", pointLight.base
+                                                     .enabled)) {
+            pointLight.base
+                      .enabled = !pointLight.base
+                                            .enabled;
+        }
         ImGui::ColorEdit3("Point light color", glm::value_ptr(pointLight.base
                                                                         .color));
         ImGui::DragFloat3("ambientStrength1", glm::value_ptr(pointLight.base
@@ -61,13 +67,18 @@ void GUIController::draw() {
         ImGui::DragFloat3("specularStrength1", glm::value_ptr(pointLight.base
                                                                         .specularStrength), 0.5f, 0.0f, 100.0f);
         ImGui::DragFloat("shininess1", &pointLight.base
-                                                  .attenuation
-                                                  .w, 1.0f, 0.0f, 100.0f);
+                                                  .shininess, 1.0f, 0.0f, 100.0f);
     }
 
     ImGui::InputInt("Dirlight index", &dirSelector);
     if (dirSelector >= 0 && dirSelector < NR_DIR_LIGHTS) {
-        auto &dirLight = uboLights->dirLights[dirSelector];
+        auto &dirLight = uboLights.dirLights[dirSelector];
+        if (ImGui::RadioButton("Enabled2", dirLight.base
+                                                   .enabled)) {
+            dirLight.base
+                    .enabled = !dirLight.base
+                                        .enabled;
+        }
         ImGui::ColorEdit3("Directional light color", glm::value_ptr(dirLight.base
                                                                             .color));
         ImGui::DragFloat3("ambientStrength2", glm::value_ptr(dirLight.base
@@ -77,13 +88,18 @@ void GUIController::draw() {
         ImGui::DragFloat3("specularStrength2", glm::value_ptr(dirLight.base
                                                                       .specularStrength), 0.5f, 0.0f, 100.0f);
         ImGui::DragFloat("shininess2", &dirLight.base
-                                                .attenuation
-                                                .w, 1.0f, 0.0f, 2048.0f);
+                                                .shininess, 1.0f, 0.0f, 2048.0f);
     }
 
     ImGui::InputInt("Spotlight index", &spotSelector);
     if (spotSelector >= 0 && spotSelector < NR_SPOT_LIGHTS) {
-        auto &spotLight = uboLights->spotLights[spotSelector];
+        auto &spotLight = uboLights.spotLights[spotSelector];
+        if (ImGui::RadioButton("Enabled3", spotLight.base
+                                                    .enabled)) {
+            spotLight.base
+                     .enabled = !spotLight.base
+                                          .enabled;
+        }
         ImGui::ColorEdit3("Spotlight color", glm::value_ptr(spotLight.base
                                                                      .color));
         ImGui::DragFloat3("ambientStrength3", glm::value_ptr(spotLight.base
@@ -93,11 +109,10 @@ void GUIController::draw() {
         ImGui::DragFloat3("specularStrength3", glm::value_ptr(spotLight.base
                                                                        .specularStrength), 0.5f, 0.0f, 100.0f);
         ImGui::DragFloat("shininess3", &spotLight.base
-                                                 .attenuation
-                                                 .w, 1.0f, 0.0f, 2048.0f);
+                                                 .shininess, 1.0f, 0.0f, 2048.0f);
     }
-    ImGui::DragFloat("exposure", &lightAttributes->exposure, 0.25f, 0.0f, 100.0f);
-    ImGui::DragFloat("gamma", &lightAttributes->gamma, 0.25f, 0.0f, 100.0f);
+    ImGui::DragFloat("exposure", &lightAttributes.exposure, 0.25f, 0.0f, 100.0f);
+    ImGui::DragFloat("gamma", &lightAttributes.gamma, 0.25f, 0.0f, 100.0f);
     ImGui::End();
     graphics->end_gui();
 }
