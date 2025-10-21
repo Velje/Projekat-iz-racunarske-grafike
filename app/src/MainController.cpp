@@ -11,10 +11,11 @@ static std::unordered_set<engine::platform::KeyId> keyControls;
 static uint32_t gBuffer;
 static std::array<uint32_t, 3> textureIDs;
 static glm::mat4 UFOMatrix;
-const size_t NR_UFO2_MODELS = 480;
+const size_t NR_UFO2_MODELS = 480, NR_UBO_MATRICES = 2;
 static std::array<glm::mat4, NR_UFO2_MODELS> UFO2Matrices;
 static float t = 0.0;
 static bool toggleUFONormals = false, spotOn = true, pointOn = true, enteredUFO = false;
+static std::vector<glm::mat4> uboMatrices(NR_UBO_MATRICES);
 
 void initialize_keyid_maps();
 
@@ -179,13 +180,21 @@ void MainController::update_camera() {
             float eventEnd;
             if (platform->key(engine::platform::KeyId::KEY_LEFT_SHIFT)
                         .is_down()) {
-                camera->MovementSpeed = 1000.0f;
+                if (enteredUFO) {
+                    camera->MovementSpeed = 10000.0f;
+                } else {
+                    camera->MovementSpeed = 1000.0f;
+                }
                 eventEnd = platform->getGlfwTime();
                 EventController::instaLog(
                         Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
                                EventB::CAMERA_SPEED_INCREASED));
             } else {
-                camera->MovementSpeed = 250.0f;
+                if (enteredUFO) {
+                    camera->MovementSpeed = 1000.0f;
+                } else {
+                    camera->MovementSpeed = 250.0f;
+                }
                 eventEnd = platform->getGlfwTime();
                 EventController::instaLog(
                         Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
@@ -193,31 +202,24 @@ void MainController::update_camera() {
             }
             eventStart = platform->getGlfwTime();
             if (enteredUFO) {
-                float lastPitch = camera->Pitch, lastYaw = camera->Yaw;
-                camera->Pitch = 0.0f;
-                camera->Yaw = 0.0f;
-                camera->Position =
-                        glm::vec3(UFOMatrix[3][0], UFOMatrix[3][1], UFOMatrix[3][2]) - 450.0f * camera->Front;
-                camera->Pitch = lastPitch;
-                camera->Yaw = lastYaw;
-            } else {
-                camera->move_camera(pair.second, deltaTime);
-            }
-            eventEnd = platform->getGlfwTime();
-            EventController::instaLog(
-                    Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
-                           EventB::CAMERA_POSITION));
-            eventStart = platform->getGlfwTime();
-            if (enteredUFO) {
                 updateModelPosition(UFOMatrix, pair.second);
                 for (size_t i = 0; i < NR_UFO2_MODELS; i++) {
                     updateModelPosition(UFO2Matrices[i], pair.second);
                 }
+                camera->Position =
+                        glm::vec3(UFOMatrix[3]) - 1000.0f * camera->Front;
+                eventEnd = platform->getGlfwTime();
+                EventController::instaLog(
+                        Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
+                               EventB::MODEL_POSITION));
+
+            } else {
+                camera->move_camera(pair.second, deltaTime);
+                eventEnd = platform->getGlfwTime();
+                EventController::instaLog(
+                        Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
+                               EventB::CAMERA_POSITION));
             }
-            eventEnd = platform->getGlfwTime();
-            EventController::instaLog(
-                    Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
-                           EventB::MODEL_POSITION));
         }
     }
 }
@@ -244,11 +246,27 @@ void MainController::deferredRender() {
 void MainController::geometryPass() {
     OpenGL::bindFrameBuffer(gBuffer);
     OpenGL::clear_buffers();
+    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+    graphics->perspective_params()
+            .Near = 5.0f;
+    graphics->perspective_params()
+            .Far = 5000.0f;
+    uboMatrices = {graphics->camera()
+                           ->view_matrix(), graphics->projection_matrix()};
+    Shader::setupUBOMatrices(uboMatrices);
+    if (toggleUFONormals) {
+        drawUFONormals();
+    }
     drawTerrain();
     OpenGL::enable_backCulling();
     drawPlatform();
     drawUFO();
     drawUFO2();
+    graphics->perspective_params()
+            .Far = 1500000.0f;
+    uboMatrices = {graphics->camera()
+                           ->view_matrix(), graphics->projection_matrix()};
+    Shader::setupUBOMatrices(uboMatrices);
     drawEarth();
     OpenGL::bindFrameBuffer(0);
 }
@@ -261,8 +279,9 @@ void MainController::lightPass() {
     if (spotOn) {
         for (size_t i = 0; i < NR_SPOT_LIGHTS; i++) {
             float angle = t * 2.0f + 2 * i * M_PI / NR_SPOT_LIGHTS;
-            uboLights.spotLights[i].position = glm::vec3(UFOMatrix[3][0] + 48.0f * cos(angle), UFOMatrix[3][1] + 60.0f,
-                                                         UFOMatrix[3][2] - 48.0f * sin(angle));
+            uboLights.spotLights[i].position = glm::vec3(UFOMatrix[3]) + glm::vec3(48.0f * cos(angle),
+                                                                                   60.0f,
+                                                                                   48.0f * sin(angle));
         }
     }
     if (pointOn) {
@@ -308,8 +327,6 @@ void MainController::drawEarth() {
 }
 
 void MainController::drawUFO() {
-    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
-    auto camera = graphics->camera();
     auto resources = engine::core::Controller::get<ResourcesController>();
     Model *ufo_obj = resources->model("UFO");
     Shader *defaultShader = resources->shader("default");
@@ -326,7 +343,6 @@ void MainController::drawUFO() {
 
 void MainController::drawUFO2() {
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
-    auto camera = graphics->camera();
     auto resources = engine::core::Controller::get<ResourcesController>();
     Model *lowpolyUFO = resources->model("Low_poly_ufo_OBJ");
     Shader *instancingShader = resources->shader("instancing");
@@ -404,17 +420,10 @@ void MainController::drawSkybox() {
 
 void MainController::begin_draw() {
     OpenGL::clear_buffers();
-    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
-    std::vector<glm::mat4> uboMatrices = {graphics->camera()
-                                                  ->view_matrix(), graphics->projection_matrix()};
-    Shader::setupUBOMatrices(uboMatrices);
 }
 
 void MainController::draw() {
     deferredRender();
-    if (toggleUFONormals) {
-        drawUFONormals();
-    }
     drawSkybox();
     OpenGL::disable_culling();
 }
