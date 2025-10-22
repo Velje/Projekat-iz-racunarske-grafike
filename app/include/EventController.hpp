@@ -43,10 +43,10 @@ const static size_t ACTIONS_EVENTS_COUNT = EVENTB_COUNT;
 class Action {
 public:
     Actions action;
-    float actionTime;
-    EventA eventA;
-    float eventTime;
-    EventB eventB;
+    float action_time;
+    EventA event_a;
+    float event_time;
+    EventB event_b;
 };
 
 class EventController : public engine::core::Controller {
@@ -54,20 +54,20 @@ public:
 
     static void notify(Action &&action);
 
-    static void instaLog(Action &&action);
+    static void insta_log(Action &&action);
 
-    static std::string_view actionsString(Actions &action);
+    static std::string_view actions_string(Actions &action);
 
-    static std::string_view eventAString(EventA &eventA);
+    static std::string_view event_a_string(EventA &event_a);
 
-    static std::string_view eventBString(EventB &eventB);
+    static std::string_view event_b_string(EventB &event_b);
 
 
 private:
 
-    static void logActions();
+    static void log_actions();
 
-    static void logAction(Action &action);
+    static void log_action(Action &action);
 
     void initialize() override;
 

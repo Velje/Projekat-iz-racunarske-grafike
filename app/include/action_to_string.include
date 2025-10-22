@@ -1,4 +1,4 @@
-ActionToString = {
+g_action_to_string = {
     // Actions
 "PRESS",
 "MOVE",

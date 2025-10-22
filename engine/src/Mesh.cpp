@@ -6,7 +6,7 @@
 
 namespace engine::resources {
 
-static uint32_t instanceVBO = 0;
+static uint32_t g_instance_vbo = 0;
 
 Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices,
            std::vector<Texture *> textures) {
@@ -44,10 +44,10 @@ Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &ind
     glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                           (void *) offsetof(Vertex, Bitangent));
 
-    if (!instanceVBO) {
-        glGenBuffers(1, &instanceVBO);
+    if (!g_instance_vbo) {
+        glGenBuffers(1, &g_instance_vbo);
     }
-    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, g_instance_vbo);
     std::size_t v4s = sizeof(glm::vec4);
     for (uint32_t i = 0; i < 4; i++) {
         glEnableVertexAttribArray(5 + i);
@@ -86,7 +86,7 @@ void Mesh::destroy() {
     glDeleteVertexArrays(1, &m_vao);
 }
 
-void Mesh::drawInstances(Shader *&shader, std::vector<glm::mat4> &modelMatrices) {
+void Mesh::draw_instances(Shader *&shader, std::vector<glm::mat4> &model_matrices) {
     std::unordered_map<std::string_view, uint32_t> counts;
     std::string uniform_name;
     uniform_name.reserve(32);
@@ -101,10 +101,10 @@ void Mesh::drawInstances(Shader *&shader, std::vector<glm::mat4> &modelMatrices)
         uniform_name.clear();
     }
     glBindVertexArray(m_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-    uint32_t instanceCount = modelMatrices.size();
+    glBindBuffer(GL_ARRAY_BUFFER, g_instance_vbo);
+    uint32_t instanceCount = model_matrices.size();
     glBufferData(GL_ARRAY_BUFFER, instanceCount * sizeof(glm::mat4),
-                 modelMatrices.data(), GL_STATIC_DRAW);
+                 model_matrices.data(), GL_STATIC_DRAW);
     glDrawElementsInstanced(GL_TRIANGLES,
                             m_num_indices, GL_UNSIGNED_INT, 0, instanceCount);
     glBindVertexArray(0);

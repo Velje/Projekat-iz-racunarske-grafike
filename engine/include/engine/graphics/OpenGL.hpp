@@ -145,20 +145,20 @@ public:
 
     static void enable_antialiasing();
 
-    static void enable_backCulling();
+    static void enable_back_culling();
 
     static void disable_culling();
 
-    static std::array<uint32_t, 3> generateGbuffer(uint32_t &gBuffer, const int32_t &SCR_WIDTH,
-                                                   const int32_t &SCR_HEIGHT);
+    static std::array<uint32_t, 3> generate_gbuffer(uint32_t &g_buffer, const int32_t &scr_width,
+                                                    const int32_t &scr_height);
 
-    static void activateGbuffertextures(std::array<uint32_t, 3> &textureIDs);
+    static void activate_gbuffertextures(std::array<uint32_t, 3> &texture_ids);
 
-    static void bindFrameBuffer(uint32_t buffer);
+    static void bind_frame_buffer(uint32_t buffer);
 
-    static void writeToDefaultFramebuffer(uint32_t &buffer, const int32_t &SCR_WIDTH, const int32_t &SCR_HEIGHT);
+    static void write_to_default_framebuffer(uint32_t &buffer, const int32_t &scr_width, const int32_t &scr_height);
 
-    static void renderScreen();
+    static void render_screen();
 
 private:
     /**

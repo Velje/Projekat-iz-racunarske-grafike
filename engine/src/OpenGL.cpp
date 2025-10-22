@@ -12,8 +12,8 @@
 
 namespace engine::graphics {
 
-static uint32_t quadVAO = 0;
-static uint32_t quadVBO;
+static uint32_t g_quad_vao = 0;
+static uint32_t g_quad_vbo;
 
 int32_t OpenGL::shader_type_to_opengl_type(resources::ShaderType type) {
     switch (type) {
@@ -195,14 +195,14 @@ void OpenGL::enable_antialiasing() {
     CHECKED_GL_CALL(glEnable, GL_MULTISAMPLE);
 }
 
-std::array<uint32_t, 3> OpenGL::generateGbuffer(uint32_t &gBuffer, const int32_t &SCR_WIDTH,
-                                                const int32_t &SCR_HEIGHT) {
-    glGenFramebuffers(1, &gBuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+std::array<uint32_t, 3> OpenGL::generate_gbuffer(uint32_t &g_buffer, const int32_t &scr_width,
+                                                 const int32_t &scr_height) {
+    glGenFramebuffers(1, &g_buffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, g_buffer);
     std::array<uint32_t, 3> textureIDs;
     glGenTextures(1, &textureIDs[0]);
     glBindTexture(GL_TEXTURE_2D, textureIDs[0]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, scr_width, scr_height, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureIDs[0], 0);
@@ -210,7 +210,7 @@ std::array<uint32_t, 3> OpenGL::generateGbuffer(uint32_t &gBuffer, const int32_t
     // - normal color buffer
     glGenTextures(1, &textureIDs[1]);
     glBindTexture(GL_TEXTURE_2D, textureIDs[1]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, scr_width, scr_height, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, textureIDs[1], 0);
@@ -218,7 +218,7 @@ std::array<uint32_t, 3> OpenGL::generateGbuffer(uint32_t &gBuffer, const int32_t
     // - color + specular color buffer
     glGenTextures(1, &textureIDs[2]);
     glBindTexture(GL_TEXTURE_2D, textureIDs[2]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, scr_width, scr_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, textureIDs[2], 0);
@@ -227,33 +227,33 @@ std::array<uint32_t, 3> OpenGL::generateGbuffer(uint32_t &gBuffer, const int32_t
     glDrawBuffers(3, &attachments[0]);
     glGenRenderbuffers(1, &rboDepth);
     glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, scr_width, scr_height);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
     CHECKED_GL_CALL(glCheckFramebufferStatus, GL_FRAMEBUFFER);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     return textureIDs;
 }
 
-void OpenGL::bindFrameBuffer(uint32_t buffer) {
+void OpenGL::bind_frame_buffer(uint32_t buffer) {
     glBindFramebuffer(GL_FRAMEBUFFER, buffer);
 }
 
-void OpenGL::writeToDefaultFramebuffer(uint32_t &buffer, const int32_t &SCR_WIDTH, const int32_t &SCR_HEIGHT) {
+void OpenGL::write_to_default_framebuffer(uint32_t &buffer, const int32_t &scr_width, const int32_t &scr_height) {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, buffer);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+    glBlitFramebuffer(0, 0, scr_width, scr_height, 0, 0, scr_width, scr_height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void OpenGL::activateGbuffertextures(std::array<uint32_t, 3> &textureIDs) {
-    for (uint32_t i = 0; i < textureIDs.size(); i++) {
+void OpenGL::activate_gbuffertextures(std::array<uint32_t, 3> &texture_ids) {
+    for (uint32_t i = 0; i < texture_ids.size(); i++) {
         glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, textureIDs[i]);
+        glBindTexture(GL_TEXTURE_2D, texture_ids[i]);
     }
 }
 
-void OpenGL::renderScreen() {
-    if (quadVAO == 0) {
+void OpenGL::render_screen() {
+    if (g_quad_vao == 0) {
         float quadVertices[] = {
                 // positions        // texture Coords
                 -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
@@ -261,22 +261,22 @@ void OpenGL::renderScreen() {
                 1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
                 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
         };
-        glGenVertexArrays(1, &quadVAO);
-        glGenBuffers(1, &quadVBO);
-        glBindVertexArray(quadVAO);
-        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glGenVertexArrays(1, &g_quad_vao);
+        glGenBuffers(1, &g_quad_vbo);
+        glBindVertexArray(g_quad_vao);
+        glBindBuffer(GL_ARRAY_BUFFER, g_quad_vbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) 0);
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (3 * sizeof(float)));
     }
-    glBindVertexArray(quadVAO);
+    glBindVertexArray(g_quad_vao);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
 }
 
-void OpenGL::enable_backCulling() {
+void OpenGL::enable_back_culling() {
     CHECKED_GL_CALL(glEnable, GL_CULL_FACE);
     CHECKED_GL_CALL(glCullFace, GL_BACK);
 }

@@ -252,7 +252,7 @@ void PlatformController::set_enable_cursor(bool enabled) {
     }
 }
 
-float PlatformController::getGlfwTime() {
+float PlatformController::get_glfw_time() {
     return glfwGetTime();
 }
 

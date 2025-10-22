@@ -14,15 +14,15 @@ namespace engine::resources {
 static const size_t NR_POINT_LIGHTS = 64;
 static const size_t NR_DIR_LIGHTS = 4;
 static const size_t NR_SPOT_LIGHTS = 64;
-static const size_t totalLightCount = NR_POINT_LIGHTS + NR_DIR_LIGHTS + NR_SPOT_LIGHTS;
+static const size_t NR_LIGHTS = NR_POINT_LIGHTS + NR_DIR_LIGHTS + NR_SPOT_LIGHTS;
 
 // Base layout for all lights
 struct Light {
     alignas(16) glm::vec3 color{1.0f};
     float enabled = false;
-    alignas(16) glm::vec3 ambientStrength{1.0f};
-    alignas(16) glm::vec3 diffuseStrength{1.0f};
-    alignas(16) glm::vec3 specularStrength{1.0f};
+    alignas(16) glm::vec3 ambient_strength{1.0f};
+    alignas(16) glm::vec3 diffuse_strength{1.0f};
+    alignas(16) glm::vec3 specular_strength{1.0f};
     alignas(16) glm::vec3 attenuation{1.0f, 0.0f, 0.0f};
     float shininess = 2048.0f;
 };
@@ -44,14 +44,14 @@ struct SpotLight {
     Light base;
     alignas(16) glm::vec3 position;
     alignas(16) glm::vec3 direction;
-    float cutOff;
-    float outerCutOff;
+    float cut_off;
+    float outer_cut_off;
 };
 
 struct UBOLights {
-    std::array<PointLight, NR_POINT_LIGHTS> pointLights;
-    std::array<DirectionalLight, NR_DIR_LIGHTS> dirLights;
-    std::array<SpotLight, NR_SPOT_LIGHTS> spotLights;
+    std::array<PointLight, NR_POINT_LIGHTS> point_lights;
+    std::array<DirectionalLight, NR_DIR_LIGHTS> dir_lights;
+    std::array<SpotLight, NR_SPOT_LIGHTS> spot_lights;
 };
 
 using ShaderName = std::string;
@@ -171,11 +171,11 @@ public:
     */
     const std::filesystem::path &source_path() const;
 
-    static void setupUBOMatrices(std::vector<glm::mat4> &uboMatrices);
+    static void setup_ubo_matrices(std::vector<glm::mat4> &ubo_matrices);
 
-    static void setupUBOLights(UBOLights &uboLights);
+    static void setup_ubo_lights(UBOLights &ubo_lights);
 
-    static void updateLights(UBOLights &uboLights);
+    static void update_lights(UBOLights &ubo_lights);
 
 private:
     /**

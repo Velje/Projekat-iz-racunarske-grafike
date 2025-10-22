@@ -16,7 +16,7 @@ class MainController : public engine::core::Controller {
 public:
     static void update_camera();
 
-    static const std::unordered_set<engine::platform::KeyId> &getKeyControls();
+    static const std::unordered_set<engine::platform::KeyId> &get_key_controls();
 
 private:
     void initialize() override;
@@ -35,27 +35,27 @@ private:
 
     std::string_view name() const override;
 
-    void deferredRender();
+    void deferred_render();
 
-    void geometryPass();
+    void geometry_pass();
 
-    void drawEarth();
+    void draw_earth();
 
-    void drawPlatform();
+    void draw_platform();
 
-    void drawTerrain();
+    void draw_terrain();
 
-    void drawUFO();
+    void draw_ufo();
 
-    void drawUFONormals();
+    void draw_ufo_normals();
 
-    void drawUFO2();
+    void draw_ufo_2();
 
-    void lightPass();
+    void light_pass();
 
-    void drawSkybox();
+    void draw_skybox();
 
-    static void updateModelPosition(glm::mat4 &model, Camera::Movement &direction);
+    static void update_model_position(glm::mat4 &model, Camera::Movement &direction);
 
 };
 }

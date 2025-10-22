@@ -18,25 +18,25 @@ using namespace engine::resources;
 class LightController : public engine::core::Controller {
 public:
 
-    static LightAttributes &getLightAttributesReference();
+    static LightAttributes &get_light_attributes_reference();
 
-    static UBOLights &getUBOLightsReference();
+    static UBOLights &get_ubo_lights_reference();
 
-    static std::vector<std::pair<float, float>> &getLightPositions();
+    static std::vector<std::pair<float, float>> &get_pointlight_positions();
 
-    static void togglePoint(PointLight &light);
+    static void toggle_point(PointLight &light);
 
-    static void updatePoint(PointLight &&newLight, size_t index);
+    static void update_point(PointLight &&new_light, size_t index);
 
-    static void toggleDirectional(DirectionalLight &light);
+    static void toggle_directional(DirectionalLight &light);
 
-    static void updateDirectional(DirectionalLight &&newLight, size_t index);
+    static void update_directional(DirectionalLight &&new_light, size_t index);
 
-    static void toggleSpot(SpotLight &light);
+    static void toggle_spot(SpotLight &light);
 
-    static void updateSpot(SpotLight &&newLight, size_t index);
+    static void update_spot(SpotLight &&new_light, size_t index);
 
-    static void updateLights();
+    static void update_lights();
 
 private:
 

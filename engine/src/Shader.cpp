@@ -5,54 +5,54 @@
 
 namespace engine::resources {
 
-enum uniformBlock : size_t {
+enum UniformBlock : size_t {
     Matrices,
     Lights,
-    uniformBlockCount,
+    UniformBlockCount,
 };
-static std::array<uint32_t, uniformBlockCount> uniformBlocks{};
+static std::array<uint32_t, UniformBlockCount> g_uniform_blocks{};
 
-void Shader::setupUBOMatrices(std::vector<glm::mat4> &uboMatrices) {
-    if (!uniformBlocks[Matrices]) {
-        glGenBuffers(1, &uniformBlocks[Matrices]);
-        glBindBuffer(GL_UNIFORM_BUFFER, uniformBlocks[Matrices]);
-        glBufferData(GL_UNIFORM_BUFFER, sizeof(uboMatrices[0]) * uboMatrices.size(), NULL, GL_STREAM_DRAW);
-        glBindBufferBase(GL_UNIFORM_BUFFER, Matrices, uniformBlocks[Matrices]);
+void Shader::setup_ubo_matrices(std::vector<glm::mat4> &ubo_matrices) {
+    if (!g_uniform_blocks[Matrices]) {
+        glGenBuffers(1, &g_uniform_blocks[Matrices]);
+        glBindBuffer(GL_UNIFORM_BUFFER, g_uniform_blocks[Matrices]);
+        glBufferData(GL_UNIFORM_BUFFER, sizeof(ubo_matrices[0]) * ubo_matrices.size(), NULL, GL_STREAM_DRAW);
+        glBindBufferBase(GL_UNIFORM_BUFFER, Matrices, g_uniform_blocks[Matrices]);
     }
-    glBindBuffer(GL_UNIFORM_BUFFER, uniformBlocks[Matrices]);
+    glBindBuffer(GL_UNIFORM_BUFFER, g_uniform_blocks[Matrices]);
     void *ptr = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-    memcpy(ptr, uboMatrices.data(), sizeof(uboMatrices[0]) * uboMatrices.size());
+    memcpy(ptr, ubo_matrices.data(), sizeof(ubo_matrices[0]) * ubo_matrices.size());
     glUnmapBuffer(GL_UNIFORM_BUFFER);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void Shader::setupUBOLights(UBOLights &uboLights) {
-    if (!uniformBlocks[Lights]) {
-        glGenBuffers(1, &uniformBlocks[Lights]);
-        glBindBuffer(GL_UNIFORM_BUFFER, uniformBlocks[Lights]);
-        glBufferData(GL_UNIFORM_BUFFER, sizeof(uboLights), nullptr, GL_STREAM_DRAW);
-        glBindBufferBase(GL_UNIFORM_BUFFER, Lights, uniformBlocks[Lights]);
+void Shader::setup_ubo_lights(UBOLights &ubo_lights) {
+    if (!g_uniform_blocks[Lights]) {
+        glGenBuffers(1, &g_uniform_blocks[Lights]);
+        glBindBuffer(GL_UNIFORM_BUFFER, g_uniform_blocks[Lights]);
+        glBufferData(GL_UNIFORM_BUFFER, sizeof(ubo_lights), nullptr, GL_STREAM_DRAW);
+        glBindBufferBase(GL_UNIFORM_BUFFER, Lights, g_uniform_blocks[Lights]);
     }
-    glBindBuffer(GL_UNIFORM_BUFFER, uniformBlocks[Lights]);
+    glBindBuffer(GL_UNIFORM_BUFFER, g_uniform_blocks[Lights]);
     void *ptr = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-    memcpy(ptr, &uboLights, sizeof(uboLights));
+    memcpy(ptr, &ubo_lights, sizeof(ubo_lights));
     glUnmapBuffer(GL_UNIFORM_BUFFER);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void Shader::updateLights(UBOLights &uboLights) {
-    glBindBuffer(GL_UNIFORM_BUFFER, uniformBlocks[Lights]);
+void Shader::update_lights(UBOLights &ubo_lights) {
+    glBindBuffer(GL_UNIFORM_BUFFER, g_uniform_blocks[Lights]);
     size_t offsetLight = sizeof(PointLight);
     size_t offsetPos = sizeof(Light);
     for (size_t i = 0; i < NR_POINT_LIGHTS; i++) {
         glBufferSubData(GL_UNIFORM_BUFFER, i * offsetLight + offsetPos, sizeof(glm::vec3),
-                        &uboLights.pointLights[i].position);
+                        &ubo_lights.point_lights[i].position);
     }
     offsetLight = sizeof(SpotLight);
     size_t offsetToSpotlights = sizeof(PointLight) * NR_POINT_LIGHTS + sizeof(DirectionalLight) * NR_DIR_LIGHTS;
     for (size_t i = 0; i < NR_SPOT_LIGHTS; i++) {
         glBufferSubData(GL_UNIFORM_BUFFER, offsetToSpotlights + i * offsetLight + offsetPos, sizeof(glm::vec3),
-                        &uboLights.spotLights[i].position);
+                        &ubo_lights.spot_lights[i].position);
     }
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }

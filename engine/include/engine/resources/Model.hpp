@@ -28,9 +28,9 @@ public:
     /**
     * @brief Use for instanced drawing.
     * @param shader Adequate shader prepared for 5 6 7 8.
-    * @param modelMatrices Models to use for every instance.
+    * @param model_matrices Models to use for every instance.
     */
-    void drawInstances(Shader *&shader, std::vector<glm::mat4> &modelMatrices);
+    void draw_instances(Shader *&shader, std::vector<glm::mat4> &model_matrices);
 
     /**
     * @brief Destroys the model in the OpenGL context.

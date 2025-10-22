@@ -1,4 +1,4 @@
-keyControls = {
+g_key_controls = {
     engine::platform::KeyId::KEY_P,
     engine::platform::KeyId::KEY_I,
     engine::platform::KeyId::KEY_O,
@@ -10,6 +10,6 @@ keyControls = {
     engine::platform::KeyId::KEY_LEFT_SHIFT,
 };
 
-for (auto &pair: KeyIdToCameraMovement) {
-    keyControls.emplace(pair.first);
+for (auto &pair: g_key_id_to_camera_movement) {
+    g_key_controls.emplace(pair.first);
 }
