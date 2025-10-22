@@ -202,6 +202,8 @@ void MainController::update_camera() {
             }
             eventStart = platform->getGlfwTime();
             if (enteredUFO) {
+                camera->Position =
+                        glm::vec3(UFOMatrix[3]) - 1000.0f * camera->Front;
                 updateModelPosition(UFOMatrix, pair.second);
                 for (size_t i = 0; i < NR_UFO2_MODELS; i++) {
                     updateModelPosition(UFO2Matrices[i], pair.second);
@@ -281,7 +283,7 @@ void MainController::lightPass() {
             float angle = t * 2.0f + 2 * i * M_PI / NR_SPOT_LIGHTS;
             uboLights.spotLights[i].position = glm::vec3(UFOMatrix[3]) + glm::vec3(48.0f * cos(angle),
                                                                                    60.0f,
-                                                                                   48.0f * sin(angle));
+                                                                                   -48.0f * sin(angle));
         }
     }
     if (pointOn) {

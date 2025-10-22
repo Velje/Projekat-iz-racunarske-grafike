@@ -45,6 +45,7 @@ void PlatformController::initialize() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_DEPTH_BITS, 32);
 
     util::Configuration::json &config = util::Configuration::config();
     int window_width = config["window"]["width"];
@@ -61,7 +62,6 @@ void PlatformController::initialize() {
     }
     RG_GUARANTEE(handle, "GLFW3 platform failed to create a Window.");
     m_window = Window(handle, window_width, window_height, window_title);
-
     glfwMakeContextCurrent(m_window.handle_());
     glfwSetCursorPosCallback(m_window.handle_(), glfw_mouse_callback);
     glfwSetScrollCallback(m_window.handle_(), glfw_scroll_callback);

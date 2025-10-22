@@ -1,6 +1,6 @@
 # Alien space station
 
-40/2021 - Veljko J
+40/2021 - Veljko Jaksic
 
 Fly around in an UFO near Earth with your smaller UFO crew and play with the lighting.
 
