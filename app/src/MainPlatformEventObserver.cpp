@@ -6,6 +6,7 @@
 namespace app {
 
 void MainPlatformEventObserver::on_mouse_move(engine::platform::MousePosition position) {
+    auto eventController = engine::core::Controller::get<EventController>();
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     float actionStart = platform->get_glfw_time();
     auto guiController = engine::core::Controller::get<GUIController>();
@@ -15,13 +16,14 @@ void MainPlatformEventObserver::on_mouse_move(engine::platform::MousePosition po
         float eventStart = platform->get_glfw_time();
         camera->rotate_camera(position.dx, position.dy);
         float eventEnd = platform->get_glfw_time();
-        EventController::insta_log(Action(Actions::MOVE, actionEnd - actionStart, EventA::MOUSE,
+        eventController->insta_log(Action(Actions::MOVE, actionEnd - actionStart, EventA::MOUSE,
                                           eventEnd - eventStart, EventB::CAMERA_ROTATION));
     }
 
 }
 
 void MainPlatformEventObserver::on_scroll(engine::platform::MousePosition position) {
+    auto eventController = engine::core::Controller::get<EventController>();
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     float actionStart = platform->get_glfw_time();
     auto guiController = engine::core::Controller::get<GUIController>();
@@ -31,12 +33,13 @@ void MainPlatformEventObserver::on_scroll(engine::platform::MousePosition positi
         float eventStart = platform->get_glfw_time();
         camera->zoom(position.scroll);
         float eventEnd = platform->get_glfw_time();
-        EventController::insta_log(Action(Actions::SCROLL, actionEnd - actionStart, EventA::MOUSE,
+        eventController->insta_log(Action(Actions::SCROLL, actionEnd - actionStart, EventA::MOUSE,
                                           eventEnd - eventStart, EventB::CAMERA_ZOOM));
     }
 }
 
 void MainPlatformEventObserver::on_key(engine::platform::Key key) {
+    auto eventController = engine::core::Controller::get<EventController>();
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     float actionStart = platform->get_glfw_time();
     auto guiController = engine::core::Controller::get<GUIController>();
@@ -47,7 +50,7 @@ void MainPlatformEventObserver::on_key(engine::platform::Key key) {
         if (controls.find(key.id()) == end(controls)) {
             spdlog::info("{0} is not supported.", key.name());
             float eventEnd = platform->get_glfw_time();
-            EventController::insta_log(Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY,
+            eventController->insta_log(Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY,
                                               eventEnd - eventStart, EventB::NOTHING_B));
         }
     }

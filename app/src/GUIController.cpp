@@ -25,7 +25,7 @@ void GUIController::poll_events() {
         Shader::setup_ubo_lights(g_ubo_lights_reference);
         set_enable(!is_enabled());
         auto eventEnd = platform->get_glfw_time();
-        EventController::insta_log(
+        eventController->insta_log(
                 Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
                        EventB::GUI_TOGGLE));
     }

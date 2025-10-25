@@ -5,7 +5,6 @@ namespace app {
 void initialize_action_maps();
 
 static std::array<std::string_view, ACTIONS_EVENTS_COUNT> g_action_to_string;
-static std::vector<Action> actions;
 static float t = 0.0f;
 
 void EventController::initialize() {
@@ -30,7 +29,7 @@ void EventController::poll_events() {
 }
 
 void EventController::notify(Action &&action) {
-    actions.emplace_back(action);
+    m_actions.emplace_back(action);
 }
 
 void EventController::log_action(Action &action) {
@@ -48,11 +47,11 @@ void EventController::insta_log(Action &&action) {
 }
 
 void EventController::log_actions() {
-    if (!actions.empty()) {
-        for (auto &action: actions) {
+    if (!m_actions.empty()) {
+        for (auto &action: m_actions) {
             log_action(action);
         }
-        actions.clear();
+        m_actions.clear();
     }
 }
 

@@ -1,4 +1,4 @@
-#include<glad/glad.h>
+#include <glad/glad.h>
 #include <engine/util/Utils.hpp>
 #include <engine/resources/Mesh.hpp>
 #include <engine/resources/Shader.hpp>

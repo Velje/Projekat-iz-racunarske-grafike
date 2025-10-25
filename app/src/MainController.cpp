@@ -75,6 +75,7 @@ bool MainController::loop() {
 }
 
 void MainController::poll_events() {
+    auto eventController = engine::core::Controller::get<EventController>();
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     auto &uboLights = LightController::get_ubo_lights_reference();
     float actionStart, actionEnd, eventStart, eventEnd;
@@ -89,7 +90,7 @@ void MainController::poll_events() {
         }
         Shader::setup_ubo_lights(uboLights);
         eventEnd = platform->get_glfw_time();
-        EventController::insta_log(Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
+        eventController->insta_log(Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
                                           EventB::LIGHTS_TOGGLE_POINT));
     }
     if (platform->key(engine::platform::KeyId::KEY_I)
@@ -102,7 +103,7 @@ void MainController::poll_events() {
         }
         Shader::setup_ubo_lights(uboLights);
         eventEnd = platform->get_glfw_time();
-        EventController::insta_log(Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
+        eventController->insta_log(Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
                                           EventB::LIGHTS_TOGGLE_DIR));
     }
     if (platform->key(engine::platform::KeyId::KEY_O)
@@ -116,7 +117,7 @@ void MainController::poll_events() {
         }
         Shader::setup_ubo_lights(uboLights);
         eventEnd = platform->get_glfw_time();
-        EventController::insta_log(Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
+        eventController->insta_log(Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
                                           EventB::LIGHTS_TOGGLE_SPOTLIGHT));
     }
     if (platform->key((engine::platform::KeyId::KEY_N))
@@ -126,7 +127,7 @@ void MainController::poll_events() {
         eventStart = platform->get_glfw_time();
         g_toggle_ufo_normals = !g_toggle_ufo_normals;
         eventEnd = platform->get_glfw_time();
-        EventController::insta_log(Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
+        eventController->insta_log(Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
                                           EventB::MODEL_TOGGLE_NORMALS));
     }
     if (platform->key((engine::platform::KeyId::KEY_SPACE))
@@ -157,7 +158,7 @@ void MainController::poll_events() {
             g_ufo_2_matrices[i] = model;
         }
         eventEnd = platform->get_glfw_time();
-        EventController::insta_log(Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
+        eventController->insta_log(Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
                                           EventB::CAMERA_POSITION));
     }
     if (platform->key((engine::platform::KeyId::KEY_ENTER))
@@ -167,6 +168,7 @@ void MainController::poll_events() {
 }
 
 void MainController::update_camera() {
+    auto eventController = engine::core::Controller::get<EventController>();
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
     auto camera = graphics->camera();
@@ -186,7 +188,7 @@ void MainController::update_camera() {
                     camera->MovementSpeed = 1000.0f;
                 }
                 eventEnd = platform->get_glfw_time();
-                EventController::insta_log(
+                eventController->insta_log(
                         Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
                                EventB::CAMERA_SPEED_INCREASED));
             } else {
@@ -196,7 +198,7 @@ void MainController::update_camera() {
                     camera->MovementSpeed = 250.0f;
                 }
                 eventEnd = platform->get_glfw_time();
-                EventController::insta_log(
+                eventController->insta_log(
                         Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
                                EventB::CAMERA_SPEED_STANDARD));
             }
@@ -211,14 +213,14 @@ void MainController::update_camera() {
                 camera->Position =
                         glm::vec3(g_ufo_matrix[3]) - 1000.0f * camera->Front;
                 eventEnd = platform->get_glfw_time();
-                EventController::insta_log(
+                eventController->insta_log(
                         Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
                                EventB::MODEL_POSITION));
 
             } else {
                 camera->move_camera(pair.second, deltaTime);
                 eventEnd = platform->get_glfw_time();
-                EventController::insta_log(
+                eventController->insta_log(
                         Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
                                EventB::CAMERA_POSITION));
             }
