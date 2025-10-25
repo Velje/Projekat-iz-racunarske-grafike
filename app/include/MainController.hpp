@@ -7,18 +7,30 @@
 #include <engine/graphics/GraphicsController.hpp>
 #include <engine/graphics/OpenGL.hpp>
 #include <spdlog/spdlog.h>
+#include <EventController.hpp>
+#include <LightController.hpp>
+#include <GUIController.hpp>
 
 namespace app {
+
+static const size_t NR_UFO2_MODELS = 480, NR_UBO_MATRICES = 2;
 
 using namespace engine::graphics;
 
 class MainController : public engine::core::Controller {
 public:
-    static void update_camera();
 
     static const std::unordered_set<engine::platform::KeyId> &get_key_controls();
 
 private:
+
+    LightController *m_light_controller;
+    EventController *m_event_controller;
+    GUIController *m_gui_controller;
+    ResourcesController *m_resources_controller;
+    GraphicsController *m_graphics_controller;
+    engine::platform::PlatformController *m_platform_controller;
+
     void initialize() override;
 
     bool loop() override;
@@ -26,6 +38,8 @@ private:
     void poll_events() override;
 
     void update() override;
+
+    void update_camera();
 
     void begin_draw() override;
 
@@ -55,7 +69,7 @@ private:
 
     void draw_skybox();
 
-    static void update_model_position(glm::mat4 &model, Camera::Movement &direction);
+    void update_model_position(glm::mat4 &model, Camera::Movement &direction);
 
 };
 }
