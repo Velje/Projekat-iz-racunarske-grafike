@@ -5,13 +5,6 @@
 
 namespace engine::resources {
 
-enum UniformBlock : size_t {
-    Matrices,
-    Lights,
-    UniformBlockCount,
-};
-static std::array<uint32_t, UniformBlockCount> g_uniform_blocks{};
-
 void Shader::setup_ubo_matrices(std::vector<glm::mat4> &ubo_matrices) {
     if (!g_uniform_blocks[Matrices]) {
         glGenBuffers(1, &g_uniform_blocks[Matrices]);

@@ -15,7 +15,12 @@ static const size_t NR_POINT_LIGHTS = 64;
 static const size_t NR_DIR_LIGHTS = 4;
 static const size_t NR_SPOT_LIGHTS = 64;
 static const size_t NR_LIGHTS = NR_POINT_LIGHTS + NR_DIR_LIGHTS + NR_SPOT_LIGHTS;
-
+enum UniformBlock : size_t {
+    Matrices,
+    Lights,
+    UniformBlockCount,
+};
+static std::array<uint32_t, UniformBlockCount> g_uniform_blocks{};
 // Base layout for all lights
 struct Light {
     alignas(16) glm::vec3 color{1.0f};

@@ -18,29 +18,31 @@ using namespace engine::resources;
 class LightController : public engine::core::Controller {
 public:
 
-    static LightAttributes &get_light_attributes_reference();
+    UBOLights m_ubo_lights;
+    LightAttributes m_light_attributes;
+    std::vector<glm::vec3> m_initial_pointlight_positions;
+    std::vector<glm::vec3> m_initial_spotlight_positions;
+    std::vector<glm::vec3> m_initial_dirlight_directions;
 
-    static UBOLights &get_ubo_lights_reference();
+    void toggle_point(PointLight &light);
 
-    static std::vector<std::pair<float, float>> &get_pointlight_positions();
+    void update_point(PointLight &&new_light, size_t index);
 
-    static void toggle_point(PointLight &light);
+    void toggle_directional(DirectionalLight &light);
 
-    static void update_point(PointLight &&new_light, size_t index);
+    void update_directional(DirectionalLight &&new_light, size_t index);
 
-    static void toggle_directional(DirectionalLight &light);
+    void toggle_spot(SpotLight &light);
 
-    static void update_directional(DirectionalLight &&new_light, size_t index);
+    void update_spot(SpotLight &&new_light, size_t index);
 
-    static void toggle_spot(SpotLight &light);
-
-    static void update_spot(SpotLight &&new_light, size_t index);
-
-    static void update_lights();
+    void update_lights();
 
 private:
 
     void initialize() override;
+
+    void initialize_lights();
 
     void poll_events() override;
 

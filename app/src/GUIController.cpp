@@ -4,8 +4,6 @@
 
 namespace app {
 
-static UBOLights &g_ubo_lights_reference = LightController::get_ubo_lights_reference();
-static LightAttributes &g_light_attributes_reference = LightController::get_light_attributes_reference();
 static int g_point_selector = 0, g_dir_selector = 0, g_spot_selector = 0;
 
 void GUIController::initialize() {
@@ -13,6 +11,7 @@ void GUIController::initialize() {
 }
 
 void GUIController::poll_events() {
+    auto &uboLights = engine::core::Controller::get<LightController>()->m_ubo_lights;
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     auto eventController = engine::core::Controller::get<EventController>();
     if (platform->key(engine::platform::KeyId::KEY_F2)
@@ -22,7 +21,7 @@ void GUIController::poll_events() {
         auto actionEnd = platform->get_glfw_time();
         auto eventStart = platform->get_glfw_time();
         eventController->set_enable(!eventController->is_enabled());
-        Shader::setup_ubo_lights(g_ubo_lights_reference);
+        Shader::setup_ubo_lights(uboLights);
         set_enable(!is_enabled());
         auto eventEnd = platform->get_glfw_time();
         eventController->insta_log(
@@ -32,6 +31,8 @@ void GUIController::poll_events() {
 }
 
 void GUIController::draw() {
+    auto &uboLights = engine::core::Controller::get<LightController>()->m_ubo_lights;
+    auto &lightAttributes = engine::core::Controller::get<LightController>()->m_light_attributes;
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     auto camera = graphics->camera();
@@ -51,7 +52,7 @@ void GUIController::draw() {
     ImGui::Text("Light control");
     ImGui::InputInt("Pointlight index", &g_point_selector);
     if (g_point_selector >= 0 && g_point_selector < NR_POINT_LIGHTS) {
-        auto &pointLight = g_ubo_lights_reference.point_lights[g_point_selector];
+        auto &pointLight = uboLights.point_lights[g_point_selector];
         if (ImGui::RadioButton("Enabled1", pointLight.base
                                                      .enabled)) {
             pointLight.base
@@ -72,7 +73,7 @@ void GUIController::draw() {
 
     ImGui::InputInt("Dirlight index", &g_dir_selector);
     if (g_dir_selector >= 0 && g_dir_selector < NR_DIR_LIGHTS) {
-        auto &dirLight = g_ubo_lights_reference.dir_lights[g_dir_selector];
+        auto &dirLight = uboLights.dir_lights[g_dir_selector];
         if (ImGui::RadioButton("Enabled2", dirLight.base
                                                    .enabled)) {
             dirLight.base
@@ -93,7 +94,7 @@ void GUIController::draw() {
 
     ImGui::InputInt("Spotlight index", &g_spot_selector);
     if (g_spot_selector >= 0 && g_spot_selector < NR_SPOT_LIGHTS) {
-        auto &spotLight = g_ubo_lights_reference.spot_lights[g_spot_selector];
+        auto &spotLight = uboLights.spot_lights[g_spot_selector];
         if (ImGui::RadioButton("Enabled3", spotLight.base
                                                     .enabled)) {
             spotLight.base
@@ -111,8 +112,8 @@ void GUIController::draw() {
         ImGui::DragFloat("shininess3", &spotLight.base
                                                  .shininess, 1.0f, 0.0f, 2048.0f);
     }
-    ImGui::DragFloat("exposure", &g_light_attributes_reference.exposure, 0.25f, 0.0f, 100.0f);
-    ImGui::DragFloat("gamma", &g_light_attributes_reference.gamma, 0.25f, 0.0f, 100.0f);
+    ImGui::DragFloat("exposure", &lightAttributes.exposure, 0.25f, 0.0f, 100.0f);
+    ImGui::DragFloat("gamma", &lightAttributes.gamma, 0.25f, 0.0f, 100.0f);
     ImGui::End();
     graphics->end_gui();
 }

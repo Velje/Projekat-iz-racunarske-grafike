@@ -77,7 +77,8 @@ bool MainController::loop() {
 void MainController::poll_events() {
     auto eventController = engine::core::Controller::get<EventController>();
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
-    auto &uboLights = LightController::get_ubo_lights_reference();
+    auto lightController = engine::core::Controller::get<LightController>();
+    auto &uboLights = lightController->m_ubo_lights;
     float actionStart, actionEnd, eventStart, eventEnd;
     if (platform->key(engine::platform::KeyId::KEY_P)
                 .state() == engine::platform::Key::State::JustPressed) {
@@ -86,7 +87,7 @@ void MainController::poll_events() {
         eventStart = platform->get_glfw_time();
         g_point_on = !g_point_on;
         for (size_t i = 0; i < NR_POINT_LIGHTS; i++) {
-            LightController::toggle_point(uboLights.point_lights[i]);
+            lightController->toggle_point(uboLights.point_lights[i]);
         }
         Shader::setup_ubo_lights(uboLights);
         eventEnd = platform->get_glfw_time();
@@ -99,7 +100,7 @@ void MainController::poll_events() {
         actionEnd = platform->get_glfw_time();
         eventStart = platform->get_glfw_time();
         for (size_t i = 0; i < NR_DIR_LIGHTS; i++) {
-            LightController::toggle_directional(uboLights.dir_lights[i]);
+            lightController->toggle_directional(uboLights.dir_lights[i]);
         }
         Shader::setup_ubo_lights(uboLights);
         eventEnd = platform->get_glfw_time();
@@ -113,7 +114,7 @@ void MainController::poll_events() {
         eventStart = platform->get_glfw_time();
         g_spot_on = !g_spot_on;
         for (size_t i = 0; i < NR_SPOT_LIGHTS; i++) {
-            LightController::toggle_spot(uboLights.spot_lights[i]);
+            lightController->toggle_spot(uboLights.spot_lights[i]);
         }
         Shader::setup_ubo_lights(uboLights);
         eventEnd = platform->get_glfw_time();
@@ -276,10 +277,11 @@ void MainController::geometry_pass() {
 }
 
 void MainController::light_pass() {
-    auto &uboLights = LightController::get_ubo_lights_reference();
+    auto lightController = engine::core::Controller::get<LightController>();
+    auto &uboLights = lightController->m_ubo_lights;
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     t += platform->dt();
-    auto &pointLightPos = LightController::get_pointlight_positions();
+    auto &pointLightPos = lightController->m_initial_pointlight_positions;
     if (g_spot_on) {
         for (size_t i = 0; i < NR_SPOT_LIGHTS; i++) {
             float angle = t * 2.0f + 2 * i * M_PI / NR_SPOT_LIGHTS;
@@ -291,11 +293,11 @@ void MainController::light_pass() {
     if (g_point_on) {
         for (size_t i = 0; i < NR_SPOT_LIGHTS; i++) {
             float angle = t * 2.0f + 2 * i * M_PI / NR_SPOT_LIGHTS;
-            uboLights.point_lights[i].position = glm::vec3(pointLightPos[i].first + 48.0f * cos(angle), 4.0f,
-                                                           pointLightPos[i].second - 48.0f * sin(angle));
+            uboLights.point_lights[i].position = pointLightPos[i] + glm::vec3(48.0f * cos(angle), 4.0f,
+                                                                              48.0f * sin(angle));
         }
     }
-    LightController::update_lights();
+    lightController->update_lights();
     OpenGL::activate_gbuffertextures(g_texture_ids);
     OpenGL::render_screen();
 }

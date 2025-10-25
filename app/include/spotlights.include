@@ -1,0 +1,10 @@
+for (size_t i = 0; i < NR_SPOT_LIGHTS; i++) {
+    double angle = 2 * i * M_PI / NR_SPOT_LIGHTS;
+    m_initial_spotlight_positions.emplace_back(48.0f * cos(angle), 200.0f, -48.0f * sin(angle));
+    size_t ostatak = i % 4;
+    glm::vec3 lightColor = glm::vec3(ostatak == 0 || ostatak == 3, ostatak == 1, ostatak == 2 || ostatak == 3);
+    update_spot(
+            SpotLight(Light(lightColor, true), m_initial_spotlight_positions[i],
+                      glm::vec3(0.0f, -1.0f, 0.0f), cos(glm::radians(1.0f)), cos(glm::radians(2.0f))),
+            i);
+}
