@@ -30,7 +30,7 @@ public:
     * @param shader Adequate shader prepared for 5 6 7 8.
     * @param model_matrices Models to use for every instance.
     */
-    void draw_instances(Shader *&shader, std::vector<glm::mat4> &model_matrices);
+    void draw_instances(const Shader *shader, std::vector<glm::mat4> &model_matrices);
 
     /**
     * @brief Destroys the model in the OpenGL context.

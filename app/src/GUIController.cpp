@@ -1,52 +1,66 @@
 #include <GUIController.hpp>
 #include <EventController.hpp>
 #include <LightController.hpp>
+#include <MainController.hpp>
 
 namespace app {
 
 static int g_point_selector = 0, g_dir_selector = 0, g_spot_selector = 0;
 
 void GUIController::initialize() {
+    m_main_controller = engine::core::Controller::get<MainController>();
     set_enable(false);
 }
 
 void GUIController::poll_events() {
-    auto &uboLights = engine::core::Controller::get<LightController>()->m_ubo_lights;
-    auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
-    auto eventController = engine::core::Controller::get<EventController>();
-    if (platform->key(engine::platform::KeyId::KEY_F2)
-                .state() == engine::platform::Key::State::JustPressed
+    auto &uboLights = m_main_controller->m_light_controller
+                                       ->m_ubo_lights;
+    if (m_main_controller->m_platform_controller
+                         ->key(engine::platform::KeyId::KEY_F2)
+                         .state() == engine::platform::Key::State::JustPressed
             ) {
-        auto actionStart = platform->get_glfw_time();
-        auto actionEnd = platform->get_glfw_time();
-        auto eventStart = platform->get_glfw_time();
-        eventController->set_enable(!eventController->is_enabled());
+        auto actionStart = m_main_controller->m_platform_controller
+                                            ->get_glfw_time();
+        auto actionEnd = m_main_controller->m_platform_controller
+                                          ->get_glfw_time();
+        auto eventStart = m_main_controller->m_platform_controller
+                                           ->get_glfw_time();
+        m_main_controller->m_event_controller
+                         ->set_enable(!m_main_controller->m_event_controller
+                                                        ->is_enabled());
         Shader::setup_ubo_lights(uboLights);
         set_enable(!is_enabled());
-        auto eventEnd = platform->get_glfw_time();
-        eventController->insta_log(
-                Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
-                       EventB::GUI_TOGGLE));
+        auto eventEnd = m_main_controller->m_platform_controller
+                                         ->get_glfw_time();
+        m_main_controller->m_event_controller
+                         ->insta_log(
+                                 Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
+                                        EventB::GUI_TOGGLE));
     }
 }
 
 void GUIController::draw() {
-    auto &uboLights = engine::core::Controller::get<LightController>()->m_ubo_lights;
-    auto &lightAttributes = engine::core::Controller::get<LightController>()->m_light_attributes;
-    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
-    auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
-    auto camera = graphics->camera();
-    graphics->begin_gui();
+    auto &uboLights = m_main_controller->m_light_controller
+                                       ->m_ubo_lights;
+    auto &lightAttributes = m_main_controller->m_light_controller
+                                             ->m_light_attributes;
+    auto camera = m_main_controller->m_graphics_controller
+                                   ->camera();
+    m_main_controller->m_graphics_controller
+                     ->begin_gui();
     ImGui::Begin("GUI");
     ImGui::Text("Camera info");
     ImGui::Text("Camera position: (%f, %f, %f)", camera->Position
                                                        .x, camera->Position
                                                                  .y, camera->Position
                                                                            .z);
-    ImGui::Text("Mouse position: %f %f", platform->mouse()
-                                                 .x, platform->mouse()
-                                                             .y);
-    auto deltaTime = platform->dt();
+    ImGui::Text("Mouse position: %f %f", m_main_controller->m_platform_controller
+                                                          ->mouse()
+                                                          .x, m_main_controller->m_platform_controller
+                                                                               ->mouse()
+                                                                               .y);
+    auto deltaTime = m_main_controller->m_platform_controller
+                                      ->dt();
     ImGui::Text("Frames per second: %f", 1 / deltaTime);
     ImGui::Text("Frame difference: %fms", deltaTime * 1000);
     ImGui::Text("Light control");
@@ -115,7 +129,8 @@ void GUIController::draw() {
     ImGui::DragFloat("exposure", &lightAttributes.exposure, 0.25f, 0.0f, 100.0f);
     ImGui::DragFloat("gamma", &lightAttributes.gamma, 0.25f, 0.0f, 100.0f);
     ImGui::End();
-    graphics->end_gui();
+    m_main_controller->m_graphics_controller
+                     ->end_gui();
 }
 
 std::string_view GUIController::name() const {

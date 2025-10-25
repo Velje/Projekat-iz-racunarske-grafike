@@ -13,6 +13,8 @@ struct LightAttributes {
     float exposure{1.0f};
 };
 
+class MainController;
+
 using namespace engine::resources;
 
 class LightController : public engine::core::Controller {
@@ -39,6 +41,8 @@ public:
     void update_lights();
 
 private:
+
+    MainController *m_main_controller;
 
     void initialize() override;
 

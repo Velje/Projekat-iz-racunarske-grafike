@@ -52,7 +52,7 @@ public:
     Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices,
          std::vector<Texture *> textures);
 
-    void draw_instances(Shader *&shader, std::vector<glm::mat4> &model_matrices);
+    void draw_instances(const Shader *shader, std::vector<glm::mat4> &model_matrices);
 
 private:
     uint32_t m_vao{0};

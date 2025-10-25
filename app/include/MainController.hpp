@@ -7,6 +7,7 @@
 #include <engine/graphics/GraphicsController.hpp>
 #include <engine/graphics/OpenGL.hpp>
 #include <spdlog/spdlog.h>
+#include <MainPlatformEventObserver.hpp>
 #include <EventController.hpp>
 #include <LightController.hpp>
 #include <GUIController.hpp>
@@ -18,6 +19,14 @@ static const size_t NR_UFO2_MODELS = 480, NR_UBO_MATRICES = 2;
 using namespace engine::graphics;
 
 class MainController : public engine::core::Controller {
+    friend class MainPlatformEventObserver;
+
+    friend class GUIController;
+
+    friend class LightController;
+
+    friend class EventController;
+
 public:
 
     static const std::unordered_set<engine::platform::KeyId> &get_key_controls();
@@ -27,7 +36,7 @@ private:
     LightController *m_light_controller;
     EventController *m_event_controller;
     GUIController *m_gui_controller;
-    ResourcesController *m_resources_controller;
+    engine::resources::ResourcesController *m_resources_controller;
     GraphicsController *m_graphics_controller;
     engine::platform::PlatformController *m_platform_controller;
 

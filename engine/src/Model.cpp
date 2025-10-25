@@ -17,7 +17,7 @@ void Model::destroy() {
     }
 }
 
-void Model::draw_instances(Shader *&shader, std::vector<glm::mat4> &model_matrices) {
+void Model::draw_instances(const Shader *shader, std::vector<glm::mat4> &model_matrices) {
     shader->use();
     for (auto &mesh: m_meshes) {
         mesh.draw_instances(shader, model_matrices);

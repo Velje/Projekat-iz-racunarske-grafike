@@ -10,8 +10,13 @@
 
 namespace app {
 
+class MainController;
+
 class GUIController : public engine::core::Controller {
 private:
+
+    MainController *m_main_controller;
+
     void initialize() override;
 
     void poll_events() override;

@@ -6,10 +6,10 @@
 
 namespace app {
 void MainApp::app_setup() {
-    auto mainController = register_controller<app::MainController>();
-    auto guiController = register_controller<app::GUIController>();
-    auto eventController = register_controller<app::EventController>();
-    auto lightController = register_controller<app::LightController>();
+    auto mainController = register_controller<MainController>();
+    auto guiController = register_controller<GUIController>();
+    auto eventController = register_controller<EventController>();
+    auto lightController = register_controller<LightController>();
     lightController->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());
     lightController->before(mainController);
     mainController->before(guiController);

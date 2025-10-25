@@ -1,5 +1,4 @@
 #include <MainController.hpp>
-#include <MainPlatformEventObserver.hpp>
 
 namespace app {
 
@@ -22,12 +21,6 @@ const std::unordered_set<engine::platform::KeyId> &MainController::get_key_contr
 }
 
 void MainController::initialize() {
-    m_light_controller = engine::core::Controller::get<LightController>();
-    m_event_controller = engine::core::Controller::get<EventController>();
-    m_platform_controller = engine::core::Controller::get<engine::platform::PlatformController>();
-    m_resources_controller = engine::core::Controller::get<ResourcesController>();
-    m_gui_controller = engine::core::Controller::get<GUIController>();
-    m_graphics_controller = engine::core::Controller::get<GraphicsController>();
     auto window = m_platform_controller->window();
     m_platform_controller->register_platform_event_observer(std::make_unique<MainPlatformEventObserver>());
     g_key_id_to_camera_movement.rehash(Camera::Movement::MOVEMENT_COUNT);

@@ -86,7 +86,7 @@ void Mesh::destroy() {
     glDeleteVertexArrays(1, &m_vao);
 }
 
-void Mesh::draw_instances(Shader *&shader, std::vector<glm::mat4> &model_matrices) {
+void Mesh::draw_instances(const Shader *shader, std::vector<glm::mat4> &model_matrices) {
     std::unordered_map<std::string_view, uint32_t> counts;
     std::string uniform_name;
     uniform_name.reserve(32);

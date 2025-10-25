@@ -1,4 +1,4 @@
-#include <EventController.hpp>
+#include <MainController.hpp>
 
 namespace app {
 
@@ -8,6 +8,7 @@ static std::array<std::string_view, ACTIONS_EVENTS_COUNT> g_action_to_string;
 static float t = 0.0f;
 
 void EventController::initialize() {
+    m_main_controller = engine::core::Controller::get<MainController>();
     initialize_action_maps();
 }
 
@@ -19,8 +20,8 @@ void initialize_action_maps() {
 
 void EventController::poll_events() {
     if (is_enabled()) {
-        auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
-        t += platform->dt();
+        t += m_main_controller->m_platform_controller
+                              ->dt();
         if (t >= 10.0f) {
             insta_log(Action(Actions::NOTHING, t, EventA::NOTHING_A, 0, EventB::NOTHING_B));
         }

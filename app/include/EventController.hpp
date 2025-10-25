@@ -48,6 +48,8 @@ struct Action {
     EventB event_b;
 };
 
+class MainController;
+
 class EventController : public engine::core::Controller {
 public:
 
@@ -63,6 +65,8 @@ public:
 
 
 private:
+
+    MainController *m_main_controller;
 
     std::vector<Action> m_actions;
 

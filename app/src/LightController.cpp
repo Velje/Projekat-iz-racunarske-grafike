@@ -1,5 +1,4 @@
-#include <LightController.hpp>
-#include <GUIController.hpp>
+#include <MainController.hpp>
 
 namespace app {
 
@@ -13,8 +12,15 @@ void LightController::initialize_lights() {
 
 void LightController::initialize() {
     initialize_lights();
-    auto resources = engine::core::Controller::get<ResourcesController>();
-    Shader *lightShader = resources->shader("lightPass");
+    m_main_controller = engine::core::Controller::get<MainController>();
+    m_main_controller->m_light_controller = engine::core::Controller::get<LightController>();
+    m_main_controller->m_event_controller = engine::core::Controller::get<EventController>();
+    m_main_controller->m_platform_controller = engine::core::Controller::get<engine::platform::PlatformController>();
+    m_main_controller->m_resources_controller = engine::core::Controller::get<ResourcesController>();
+    m_main_controller->m_gui_controller = engine::core::Controller::get<GUIController>();
+    m_main_controller->m_graphics_controller = engine::core::Controller::get<GraphicsController>();
+    Shader *lightShader = m_main_controller->m_resources_controller
+                                           ->shader("lightPass");
     lightShader->use();
     lightShader->set_int("gPosition", 0);
     lightShader->set_int("gNormal", 1);
@@ -64,12 +70,12 @@ std::string_view LightController::name() const {
 }
 
 void LightController::update_lights() {
-    auto resources = engine::core::Controller::get<ResourcesController>();
-    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
-    Shader *lightShader = resources->shader("lightPass");
+    Shader *lightShader = m_main_controller->m_resources_controller
+                                           ->shader("lightPass");
     lightShader->use();
-    lightShader->set_vec3("viewPos", graphics->camera()
-                                             ->Position);
+    lightShader->set_vec3("viewPos", m_main_controller->m_graphics_controller
+                                                      ->camera()
+                                                      ->Position);
     lightShader->set_float("exposure", m_light_attributes.exposure);
     lightShader->set_float("gamma", m_light_attributes.gamma);
     Shader::update_lights(m_ubo_lights);
