@@ -8,9 +8,6 @@ static std::array<glm::mat4, NR_UFO2_MODELS> g_ufo_2_matrices;
 static std::vector<glm::mat4> g_ubo_matrices(NR_UBO_MATRICES);
 static glm::mat4 g_ufo_matrix;
 
-static uint32_t g_g_buffer;
-static std::array<uint32_t, 3> g_texture_ids;
-
 static bool g_toggle_ufo_normals = false, g_spot_on = true, g_point_on = true, g_entered_ufo = false;
 static float t = 0.0;
 
@@ -26,8 +23,10 @@ void MainController::initialize() {
     g_key_id_to_camera_movement.rehash(Camera::Movement::MOVEMENT_COUNT);
     initialize_keyid_maps();
     OpenGL::enable_depth_testing();
-    g_texture_ids = OpenGL::generate_gbuffer(g_g_buffer, window->width(),
-                                             window->height());
+    OpenGL::generate_gbuffer(m_graphics_controller->m_g_buffer,
+                             m_graphics_controller->m_g_texture_ids,
+                             window->width(),
+                             window->height());
     OpenGL::generate_screen_vao(m_graphics_controller->m_screen_vao);
     g_ufo_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 140.0f, 0.0f));
     float radius = 500.0f;
@@ -235,11 +234,11 @@ void MainController::deferred_render() {
     geometry_pass();
     light_pass();
     auto window = engine::core::Controller::get<engine::platform::PlatformController>()->window();
-    OpenGL::write_to_default_framebuffer(g_g_buffer, window->width(), window->height());
+    OpenGL::write_to_default_framebuffer(m_graphics_controller->m_g_buffer, window->width(), window->height());
 }
 
 void MainController::geometry_pass() {
-    OpenGL::bind_frame_buffer(g_g_buffer);
+    OpenGL::bind_frame_buffer(m_graphics_controller->m_g_buffer);
     OpenGL::clear_buffers();
     m_graphics_controller->perspective_params()
                          .Near = 5.0f;
@@ -285,7 +284,7 @@ void MainController::light_pass() {
         }
     }
     m_light_controller->update_lights();
-    OpenGL::activate_gbuffertextures(g_texture_ids);
+    OpenGL::activate_gbuffertextures(m_graphics_controller->m_g_texture_ids);
     OpenGL::render_screen(m_graphics_controller->m_screen_vao);
 }
 

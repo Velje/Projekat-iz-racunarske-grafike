@@ -149,8 +149,8 @@ public:
 
     static void disable_culling();
 
-    static std::array<uint32_t, 3> generate_gbuffer(uint32_t &g_buffer, const int32_t &scr_width,
-                                                    const int32_t &scr_height);
+    static void generate_gbuffer(uint32_t &g_buffer, std::array<uint32_t, 3> &texture_ids, const int32_t &scr_width,
+                                 const int32_t &scr_height);
 
     static void activate_gbuffertextures(std::array<uint32_t, 3> &texture_ids);
 

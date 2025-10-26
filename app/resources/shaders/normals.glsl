@@ -93,5 +93,5 @@ in GS_OUT {
 void main() {
     gPosition.xyz = fs_in.FragPos.xyz;
     gNormal.rgb = fs_in.Normal.rgb * 0.5f + 0.5f;
-    gAlbedoSpec.rgba = vec4(1.0f, 1.0f, 1.0f, 2048.0f);
+    gAlbedoSpec.rgba = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 }
