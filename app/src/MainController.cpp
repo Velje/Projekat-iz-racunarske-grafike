@@ -28,6 +28,7 @@ void MainController::initialize() {
     OpenGL::enable_depth_testing();
     g_texture_ids = OpenGL::generate_gbuffer(g_g_buffer, window->width(),
                                              window->height());
+    OpenGL::generate_screen_vao(m_graphics_controller->m_screen_vao);
     g_ufo_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 140.0f, 0.0f));
     float radius = 500.0f;
     size_t positionsPerCircle = 30;
@@ -285,7 +286,7 @@ void MainController::light_pass() {
     }
     m_light_controller->update_lights();
     OpenGL::activate_gbuffertextures(g_texture_ids);
-    OpenGL::render_screen();
+    OpenGL::render_screen(m_graphics_controller->m_screen_vao);
 }
 
 void MainController::draw_terrain() {

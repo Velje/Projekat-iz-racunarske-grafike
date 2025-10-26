@@ -54,12 +54,19 @@ in VS_OUT {
     vec3 Normal;
 } gs_in[];
 
+out GS_OUT {
+    vec3 FragPos;
+    vec3 Normal;
+} gs_out;
+
 uniform sampler2D texture_normal1;
 
 void main() {
-    for (int i = 0; i < 3; ++i) {
+    for (uint i = 0; i < 3; ++i) {
         vec3 mappedNormal = normalize(gs_in[i].TBN * (texture(texture_normal1, gs_in[i].TexCoords).rgb * 2.0f - 1.0f));
         vec3 start = gs_in[i].FragPos;
+        gs_out.FragPos = start;
+        gs_out.Normal = mappedNormal;
         vec3 end = start + mappedNormal;
 
         gl_Position = projection * view * vec4(start, 1.0f);
@@ -74,8 +81,17 @@ void main() {
 
 //#shader fragment
 #version 460 core
-out vec4 FragColor;
+layout (location = 0) out vec3 gPosition;
+layout (location = 1) out vec3 gNormal;
+layout (location = 2) out vec4 gAlbedoSpec;
+
+in GS_OUT {
+    vec3 FragPos;
+    vec3 Normal;
+} fs_in;
 
 void main() {
-    FragColor = vec4(0.0f, 1.0f, 0.0f, 0.1f);
+    gPosition.xyz = fs_in.FragPos.xyz;
+    gNormal.rgb = fs_in.Normal.rgb * 0.5f + 0.5f;
+    gAlbedoSpec.rgba = vec4(1.0f, 1.0f, 1.0f, 2048.0f);
 }

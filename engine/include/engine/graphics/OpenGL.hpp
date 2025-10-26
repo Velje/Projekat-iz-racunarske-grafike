@@ -158,7 +158,9 @@ public:
 
     static void write_to_default_framebuffer(uint32_t &buffer, const int32_t &scr_width, const int32_t &scr_height);
 
-    static void render_screen();
+    static void generate_screen_vao(uint32_t &screen_vao);
+
+    static void render_screen(uint32_t &screen_vao);
 
 private:
     /**

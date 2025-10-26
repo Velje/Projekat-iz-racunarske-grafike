@@ -6,16 +6,15 @@
 
 namespace engine::resources {
 
-static uint32_t g_instance_vbo = 0;
-
 Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices,
            std::vector<Texture *> textures) {
     // NOLINTBEGIN
     static_assert(std::is_trivial_v<Vertex>);
-    uint32_t VAO, VBO, EBO;
+    uint32_t VAO, VBO, INSTANCE_VBO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
+    glGenBuffers(1, &INSTANCE_VBO);
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -44,21 +43,18 @@ Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &ind
     glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                           (void *) offsetof(Vertex, Bitangent));
 
-    if (!g_instance_vbo) {
-        glGenBuffers(1, &g_instance_vbo);
-    }
-    glBindBuffer(GL_ARRAY_BUFFER, g_instance_vbo);
-    std::size_t v4s = sizeof(glm::vec4);
+    glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_VBO);
     for (uint32_t i = 0; i < 4; i++) {
         glEnableVertexAttribArray(5 + i);
         glVertexAttribPointer(5 + i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4),
-                              (void *) (i * v4s));
+                              (void *) (i * sizeof(glm::vec4)));
         glVertexAttribDivisor(5 + i, 1);
     }
 
     glBindVertexArray(0);
     // NOLINTEND
     m_vao = VAO;
+    m_instance_vbo = INSTANCE_VBO;
     m_num_indices = indices.size();
     m_textures = std::move(textures);
 }
@@ -101,12 +97,11 @@ void Mesh::draw_instances(const Shader *shader, std::vector<glm::mat4> &model_ma
         uniform_name.clear();
     }
     glBindVertexArray(m_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, g_instance_vbo);
-    uint32_t instanceCount = model_matrices.size();
-    glBufferData(GL_ARRAY_BUFFER, instanceCount * sizeof(glm::mat4),
-                 model_matrices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, m_instance_vbo);
+    glBufferData(GL_ARRAY_BUFFER, model_matrices.size() * sizeof(glm::mat4),
+                 model_matrices.data(), GL_DYNAMIC_DRAW);
     glDrawElementsInstanced(GL_TRIANGLES,
-                            m_num_indices, GL_UNSIGNED_INT, 0, instanceCount);
+                            m_num_indices, GL_UNSIGNED_INT, 0, model_matrices.size());
     glBindVertexArray(0);
 }
 

@@ -1,8 +1,5 @@
 #include <MainApp.hpp>
 #include <MainController.hpp>
-#include <GUIController.hpp>
-#include <EventController.hpp>
-#include <LightController.hpp>
 
 namespace app {
 void MainApp::app_setup() {

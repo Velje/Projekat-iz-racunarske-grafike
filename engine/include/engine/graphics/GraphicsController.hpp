@@ -56,6 +56,8 @@ enum ProjectionType {
 */
 class GraphicsController final : public core::Controller {
 public:
+    uint32_t m_screen_vao;
+
     std::string_view name() const override;
 
     /**

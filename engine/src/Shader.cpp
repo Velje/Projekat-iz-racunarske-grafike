@@ -9,7 +9,7 @@ void Shader::setup_ubo_matrices(std::vector<glm::mat4> &ubo_matrices) {
     if (!g_uniform_blocks[Matrices]) {
         glGenBuffers(1, &g_uniform_blocks[Matrices]);
         glBindBuffer(GL_UNIFORM_BUFFER, g_uniform_blocks[Matrices]);
-        glBufferData(GL_UNIFORM_BUFFER, sizeof(ubo_matrices[0]) * ubo_matrices.size(), NULL, GL_STREAM_DRAW);
+        glBufferData(GL_UNIFORM_BUFFER, sizeof(ubo_matrices[0]) * ubo_matrices.size(), NULL, GL_DYNAMIC_DRAW);
         glBindBufferBase(GL_UNIFORM_BUFFER, Matrices, g_uniform_blocks[Matrices]);
     }
     glBindBuffer(GL_UNIFORM_BUFFER, g_uniform_blocks[Matrices]);
@@ -23,7 +23,7 @@ void Shader::setup_ubo_lights(UBOLights &ubo_lights) {
     if (!g_uniform_blocks[Lights]) {
         glGenBuffers(1, &g_uniform_blocks[Lights]);
         glBindBuffer(GL_UNIFORM_BUFFER, g_uniform_blocks[Lights]);
-        glBufferData(GL_UNIFORM_BUFFER, sizeof(ubo_lights), nullptr, GL_STREAM_DRAW);
+        glBufferData(GL_UNIFORM_BUFFER, sizeof(ubo_lights), nullptr, GL_DYNAMIC_DRAW);
         glBindBufferBase(GL_UNIFORM_BUFFER, Lights, g_uniform_blocks[Lights]);
     }
     glBindBuffer(GL_UNIFORM_BUFFER, g_uniform_blocks[Lights]);

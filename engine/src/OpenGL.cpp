@@ -8,12 +8,9 @@
 #include <engine/resources/Skybox.hpp>
 #include <engine/util/Errors.hpp>
 #include <engine/util/Utils.hpp>
-#include "engine/resources/Texture.hpp"
+#include <engine/resources/Texture.hpp>
 
 namespace engine::graphics {
-
-static uint32_t g_quad_vao = 0;
-static uint32_t g_quad_vbo;
 
 int32_t OpenGL::shader_type_to_opengl_type(resources::ShaderType type) {
     switch (type) {
@@ -252,8 +249,8 @@ void OpenGL::activate_gbuffertextures(std::array<uint32_t, 3> &texture_ids) {
     }
 }
 
-void OpenGL::render_screen() {
-    if (g_quad_vao == 0) {
+void OpenGL::generate_screen_vao(uint32_t &screen_vao) {
+    if (screen_vao == 0) {
         float quadVertices[] = {
                 // positions        // texture Coords
                 -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
@@ -261,19 +258,25 @@ void OpenGL::render_screen() {
                 1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
                 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
         };
-        glGenVertexArrays(1, &g_quad_vao);
-        glGenBuffers(1, &g_quad_vbo);
-        glBindVertexArray(g_quad_vao);
-        glBindBuffer(GL_ARRAY_BUFFER, g_quad_vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glGenVertexArrays(1, &screen_vao);
+        uint32_t screen_vbo;
+        glGenBuffers(1, &screen_vbo);
+        glBindVertexArray(screen_vao);
+        glBindBuffer(GL_ARRAY_BUFFER, screen_vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STREAM_DRAW);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) 0);
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (3 * sizeof(float)));
     }
-    glBindVertexArray(g_quad_vao);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glBindVertexArray(0);
+}
+
+void OpenGL::render_screen(uint32_t &screen_vao) {
+    if (screen_vao) {
+        glBindVertexArray(screen_vao);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glBindVertexArray(0);
+    }
 }
 
 void OpenGL::enable_back_culling() {

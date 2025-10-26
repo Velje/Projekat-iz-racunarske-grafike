@@ -58,6 +58,7 @@ private:
     uint32_t m_vao{0};
     uint32_t m_num_indices{0};
     std::vector<Texture *> m_textures;
+    uint32_t m_instance_vbo{0};
 };
 } // namespace engine
 

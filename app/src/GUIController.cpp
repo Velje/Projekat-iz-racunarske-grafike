@@ -1,6 +1,3 @@
-#include <GUIController.hpp>
-#include <EventController.hpp>
-#include <LightController.hpp>
 #include <MainController.hpp>
 
 namespace app {
