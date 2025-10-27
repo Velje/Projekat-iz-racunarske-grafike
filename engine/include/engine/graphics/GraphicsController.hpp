@@ -56,6 +56,10 @@ enum ProjectionType {
 */
 class GraphicsController final : public core::Controller {
 public:
+    uint32_t m_screen_vao;
+    uint32_t m_g_buffer;
+    std::array<uint32_t, 3> m_g_texture_ids;
+
     std::string_view name() const override;
 
     /**
@@ -180,8 +184,11 @@ public:
 
     void on_window_resize(int width, int height) override;
 
+    void on_scroll(platform::MousePosition position) override;
+
 private:
     GraphicsController *m_graphics;
+
 };
 }
 #endif //GRAPHICSCONTROLLER_HPP

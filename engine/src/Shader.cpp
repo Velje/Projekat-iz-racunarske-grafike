@@ -1,8 +1,54 @@
 #include <glad/glad.h>
 #include <engine/resources/Shader.hpp>
 #include <engine/graphics/OpenGL.hpp>
+#include <cstring>
 
 namespace engine::resources {
+
+void Shader::setup_ubo_matrices(std::vector<glm::mat4> &ubo_matrices) {
+    if (!g_uniform_blocks[Matrices]) {
+        glGenBuffers(1, &g_uniform_blocks[Matrices]);
+        glBindBuffer(GL_UNIFORM_BUFFER, g_uniform_blocks[Matrices]);
+        glBufferData(GL_UNIFORM_BUFFER, sizeof(ubo_matrices[0]) * ubo_matrices.size(), NULL, GL_DYNAMIC_DRAW);
+        glBindBufferBase(GL_UNIFORM_BUFFER, Matrices, g_uniform_blocks[Matrices]);
+    }
+    glBindBuffer(GL_UNIFORM_BUFFER, g_uniform_blocks[Matrices]);
+    void *ptr = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+    memcpy(ptr, ubo_matrices.data(), sizeof(ubo_matrices[0]) * ubo_matrices.size());
+    glUnmapBuffer(GL_UNIFORM_BUFFER);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void Shader::setup_ubo_lights(UBOLights &ubo_lights) {
+    if (!g_uniform_blocks[Lights]) {
+        glGenBuffers(1, &g_uniform_blocks[Lights]);
+        glBindBuffer(GL_UNIFORM_BUFFER, g_uniform_blocks[Lights]);
+        glBufferData(GL_UNIFORM_BUFFER, sizeof(ubo_lights), nullptr, GL_DYNAMIC_DRAW);
+        glBindBufferBase(GL_UNIFORM_BUFFER, Lights, g_uniform_blocks[Lights]);
+    }
+    glBindBuffer(GL_UNIFORM_BUFFER, g_uniform_blocks[Lights]);
+    void *ptr = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+    memcpy(ptr, &ubo_lights, sizeof(ubo_lights));
+    glUnmapBuffer(GL_UNIFORM_BUFFER);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void Shader::update_lights(UBOLights &ubo_lights) {
+    glBindBuffer(GL_UNIFORM_BUFFER, g_uniform_blocks[Lights]);
+    size_t offsetLight = sizeof(PointLight);
+    size_t offsetPos = sizeof(Light);
+    for (size_t i = 0; i < NR_POINT_LIGHTS; i++) {
+        glBufferSubData(GL_UNIFORM_BUFFER, i * offsetLight + offsetPos, sizeof(glm::vec3),
+                        &ubo_lights.point_lights[i].position);
+    }
+    offsetLight = sizeof(SpotLight);
+    size_t offsetToSpotlights = sizeof(PointLight) * NR_POINT_LIGHTS + sizeof(DirectionalLight) * NR_DIR_LIGHTS;
+    for (size_t i = 0; i < NR_SPOT_LIGHTS; i++) {
+        glBufferSubData(GL_UNIFORM_BUFFER, offsetToSpotlights + i * offsetLight + offsetPos, sizeof(glm::vec3),
+                        &ubo_lights.spot_lights[i].position);
+    }
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
 
 void Shader::use() const {
     glUseProgram(m_shader_id);

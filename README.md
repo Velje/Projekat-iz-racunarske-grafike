@@ -122,11 +122,11 @@ For a basic app setup, you need to:
 4. Compile and run the program.
 
 ```cpp
-#include <engine/Engne.hpp>
+#include <engine/Engine.hpp>
 class MyApp : public engine::core::App {
 
 public:
-  void setup() override;
+  void app_setup() override;
 };
 
 void MyApp::app_setup() {
@@ -224,7 +224,7 @@ The `resources/models/` directory stores all the models. Let's add a backpack mo
 5. Use the model in your App:
 
 ```cpp
-    Model* backpack = engine::core::Controller::get<engine::resources::ResourcesController>()->model("backpack");
+    Model* backpack = engine::core::Controller::get<engine::resources::ResourcesController>()->model("brown_mud");
 Shader* shader   = ...
 backpack->draw(shader);
 ```
@@ -464,103 +464,3 @@ auto fps = parser->arg<int>("--fps", 60);
 
 Here you can find a walkthrough [tutorial](engine/test/app/TUTORIAL.md) for recreating the `engine/test/app` that
 demonstrates how to use different engine systems.
-
-# Style guide
-
-Naming Conventions:
-
-* Global variables: g_ prefix (e.g., g_counter)
-* Namespaces: snake_case (e.g., math_utils)
-* Structs: PascalCase (e.g., Point3D)
-* Classes: PascalCase (e.g., Calculator)
-* Static/constant variables: UPPER_CASE (e.g., MAX_OPERATIONS)
-* Public member variables: snake_case (e.g., is_active)
-* Protected member variables: m_ prefix + snake_case (e.g., m_name)
-* Private member variables: m_ prefix + snake_case (e.g., m_max_size)
-* Member functions: snake_case (e.g., calculate_average)
-* Free functions: snake_case (e.g., process_data)
-* Parameters: snake_case (e.g., max_size)
-* Local variables: snake_case (e.g., initial_capacity)
-* Template parameters: PascalCase (e.g., Container, Result, MaxSize)
-
-Code style:
-
-* Control flow statements (if/for/while/switch/try) always with braces
-* One line per variable declaration, no multiple variable declarations on a single line
-
-```C++
-#include <vector>
-#include <string>
-
-// Global variable with g_ prefix
-int g_counter = 0;
-
-// Namespace in snake_case
-namespace math_utils {
-
-// Struct in PascalCase
-struct Point3D {
-    float x, y, z;
-};
-
-// Class in PascalCase
-class Calculator {
-public:
-    // Static and/or constant in UPPER_CASE
-    static const int MAX_OPERATIONS = 100;
-    
-    // Public member variable in snake_case
-    bool is_active;
-    
-    // Constructor (parameters in snake_case)
-    Calculator(int max_size) : m_max_size(max_size), is_active(true) {
-        // Local variable in snake_case
-        int initial_capacity = max_size * 2;
-        m_results.reserve(initial_capacity);
-    }
-    
-    // Member function in snake_case
-    float calculate_average(const std::vector<float>& values) {
-        // Parameter and local variables in snake_case
-        float sum = 0.0f;
-        int count = 0;
-        
-        // Loop with braces on same line
-        for (const auto& value : values) {
-            sum += value;
-            ++count;
-        }
-        
-        // If statement with braces on same line
-        if (count > 0) {
-            return sum / count;
-        }
-        
-        return 0.0f;
-    }
-
-protected:
-    // Protected member with m_ prefix
-    std::string m_name;
-
-private:
-    // Private member variables with m_ prefix
-    int m_max_size;
-    std::vector<float> m_results;
-};
-
-} // namespace math_utils
-
-// Free function in snake_case
-void process_data() {
-    // Local variable in snake_case
-    math_utils::Calculator calc(50);
-    ++g_counter;
-}
-
-// Template parameters always in PascalCase 
-template<typename Container, typename Result, int MaxSize>
-Result operation(const Container& c) {
-   // . 
-}
-```

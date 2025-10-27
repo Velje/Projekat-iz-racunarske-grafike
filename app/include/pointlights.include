@@ -1,0 +1,13 @@
+for (size_t row = 0; row < 8; ++row) {
+    for (size_t col = 0; col < 8; ++col) {
+       float x = -100.0f + col * 200.0f / 8.0f + 200.0f / 16.0f;
+       float z = -100.0f + row * 200.0f / 8.0f + 200.0f / 16.0f;
+       m_initial_pointlight_positions.emplace_back(x, 4.0f, z);
+    }
+}
+for (size_t i = 0; i < NR_POINT_LIGHTS; i++) {
+    size_t ostatak = i % 4;
+    glm::vec3 lightColor = glm::vec3(ostatak == 0 || ostatak == 3, ostatak == 1, ostatak == 2 || ostatak == 3);
+    update_point(PointLight(Light(lightColor, true),
+                            m_initial_pointlight_positions[i]), i);
+}

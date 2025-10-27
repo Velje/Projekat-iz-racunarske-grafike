@@ -141,12 +141,34 @@ public:
     */
     static std::string get_compilation_error_message(uint32_t shader_id);
 
+    static void enable_framebuffer_srgb();
+
+    static void enable_antialiasing();
+
+    static void enable_back_culling();
+
+    static void disable_culling();
+
+    static void generate_gbuffer(uint32_t &g_buffer, std::array<uint32_t, 3> &texture_ids, const int32_t &scr_width,
+                                 const int32_t &scr_height);
+
+    static void activate_gbuffertextures(std::array<uint32_t, 3> &texture_ids);
+
+    static void bind_frame_buffer(uint32_t buffer);
+
+    static void write_to_default_framebuffer(uint32_t &buffer, const int32_t &scr_width, const int32_t &scr_height);
+
+    static void generate_screen_vao(uint32_t &screen_vao);
+
+    static void render_screen(uint32_t &screen_vao);
+
 private:
     /**
     * @brief Throws an engine::util::EngineError of type @ref engine::util::EngineError::Type::OpenGLError if an OpenGL error occurred. Used internally.
     * @param location Source location from where the OpenGL call was made.
     */
     static void assert_no_error(std::source_location location);
+
 };
 }
 #endif //OPENGL_HPP

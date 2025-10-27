@@ -41,7 +41,7 @@ void GraphicsController::initialize() {
     ImGuiIO &io = ImGui::GetIO();
     (void) io;
     RG_GUARANTEE(ImGui_ImplGlfw_InitForOpenGL(handle, true), "ImGUI failed to initialize for OpenGL");
-    RG_GUARANTEE(ImGui_ImplOpenGL3_Init("#version 330 core"), "ImGUI failed to initialize for OpenGL");
+    RG_GUARANTEE(ImGui_ImplOpenGL3_Init("#version 460 core"), "ImGUI failed to initialize for OpenGL");
 }
 
 void GraphicsController::terminate() {
@@ -50,6 +50,12 @@ void GraphicsController::terminate() {
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
     }
+}
+
+void GraphicsPlatformEventObserver::on_scroll(engine::platform::MousePosition position) {
+    m_graphics->perspective_params()
+              .FOV = glm::radians(m_graphics->camera()
+                                            ->Zoom);
 }
 
 void GraphicsPlatformEventObserver::on_window_resize(int width, int height) {
@@ -80,10 +86,7 @@ void GraphicsController::end_gui() {
 }
 
 void GraphicsController::draw_skybox(const resources::Shader *shader, const resources::Skybox *skybox) {
-    glm::mat4 view = glm::mat4(glm::mat3(m_camera.view_matrix()));
     shader->use();
-    shader->set_mat4("view", view);
-    shader->set_mat4("projection", projection_matrix<>());
     CHECKED_GL_CALL(glDepthFunc, GL_LEQUAL);
     CHECKED_GL_CALL(glBindVertexArray, skybox->vao());
     CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE0);

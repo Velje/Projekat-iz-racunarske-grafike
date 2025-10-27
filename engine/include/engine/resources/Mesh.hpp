@@ -32,7 +32,6 @@ class Mesh {
     friend class AssimpSceneProcessor;
 
 public:
-
     /**
     * @brief Draws the mesh using a given shader. Called by the @ref Model::draw function to draw all the meshes in the model.
     * @param shader The shader to use for drawing.
@@ -44,19 +43,25 @@ public:
     */
     void destroy();
 
-private:
-    /**
-    * @brief Constructs a Mesh object.
-    * @param vertices The vertices in the mesh.
-    * @param indices The indices in the mesh.
-    * @param textures The textures in the mesh.
-     */
+/**
+* @brief Constructs a Mesh object.
+* @param vertices The vertices in the mesh.
+* @param indices The indices in the mesh.
+* @param textures The textures in the mesh.
+ */
     Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices,
          std::vector<Texture *> textures);
 
+    void prepare_model_data(std::vector<glm::mat4> &model_matrices);
+
+    void draw_instances(const Shader *shader, const size_t count);
+
+private:
     uint32_t m_vao{0};
     uint32_t m_num_indices{0};
     std::vector<Texture *> m_textures;
+    uint32_t m_instance_vbo{0};
+
 };
 } // namespace engine
 

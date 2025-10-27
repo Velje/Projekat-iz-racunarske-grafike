@@ -26,7 +26,8 @@ public:
         LEFT,
         RIGHT,
         UP,
-        DOWN
+        DOWN,
+        MOVEMENT_COUNT
     };
 
     /**

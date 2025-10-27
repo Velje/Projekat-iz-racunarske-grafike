@@ -42,18 +42,26 @@ void PlatformController::initialize() {
     }
     bool glfw_initialized = glfwInit();
     RG_GUARANTEE(glfw_initialized, "GLFW platform failed to initialize_controllers.");
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_DEPTH_BITS, 32);
 
     util::Configuration::json &config = util::Configuration::config();
     int window_width = config["window"]["width"];
     int window_height = config["window"]["height"];
     std::string window_title = config["window"]["title"];
-    GLFWwindow *handle = glfwCreateWindow(window_width, window_height, window_title.c_str(), nullptr, nullptr);
+    bool fullscreen = config["window"]["fullscreen"];
+    GLFWwindow *handle;
+    if (!fullscreen) {
+        handle = glfwCreateWindow(window_width, window_height, window_title.c_str(), nullptr,
+                                  nullptr);
+    } else {
+        handle = glfwCreateWindow(window_width, window_height, window_title.c_str(), glfwGetPrimaryMonitor(),
+                                  nullptr);
+    }
     RG_GUARANTEE(handle, "GLFW3 platform failed to create a Window.");
     m_window = Window(handle, window_width, window_height, window_title);
-
     glfwMakeContextCurrent(m_window.handle_());
     glfwSetCursorPosCallback(m_window.handle_(), glfw_mouse_callback);
     glfwSetScrollCallback(m_window.handle_(), glfw_scroll_callback);
@@ -61,7 +69,8 @@ void PlatformController::initialize() {
     glfwSetFramebufferSizeCallback(m_window.handle_(), glfw_framebuffer_size_callback);
     glfwSetMouseButtonCallback(m_window.handle_(), glfw_mouse_button_callback);
     glfwSetWindowCloseCallback(m_window.handle_(), glfw_window_close_callback);
-
+    glfwSetInputMode(m_window.handle_(), GLFW_RAW_MOUSE_MOTION, true);
+//    glfwWindowHint(GLFW_SAMPLES, 16);
     int major, minor, revision;
     glfwGetVersion(&major, &minor, &revision);
     spdlog::info("Platform[GLFW {}.{}.{}]", major, minor, revision);
@@ -191,10 +200,8 @@ void PlatformController::register_platform_event_observer(std::unique_ptr<Platfo
 }
 
 void PlatformController::_platform_on_mouse(double x, double y) {
-    double last_x = g_mouse_position.x;
-    double last_y = g_mouse_position.y;
-    g_mouse_position.dx = x - last_x;
-    g_mouse_position.dy = last_y - y; // because in glfw the top left corner is the (0,0)
+    g_mouse_position.dx = x - g_mouse_position.x;
+    g_mouse_position.dy = g_mouse_position.y - y; // because in glfw the top left corner is the (0,0)
     g_mouse_position.x = x;
     g_mouse_position.y = y;
     for (auto &observer: m_platform_event_observers) {
@@ -243,6 +250,10 @@ void PlatformController::set_enable_cursor(bool enabled) {
     } else {
         glfwSetInputMode(m_window.handle_(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
+}
+
+float PlatformController::get_glfw_time() {
+    return glfwGetTime();
 }
 
 void initialize_key_maps() {

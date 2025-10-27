@@ -1,11 +1,28 @@
 {
   "resources": {
     "models": {
+      "brown_mud": {
+        "path": "brown_mud/brown_mud.obj"
+      },
+      "Earth": {
+        "path": "earth/scene.gltf",
+        "flip_uvs": true
+      },
+      "UFO": {
+        "path": "UFO_obj/UFO.obj"
+      },
+      "Low_poly_ufo_OBJ": {
+        "path": "Low_poly_ufo_OBJ/Low_poly_UFO.obj"
+      },
+      "Platform": {
+        "path": "platform3/untitled.obj"
+      }
     }
   },
   "window": {
-    "height": 600,
-    "title": "Hello, window!",
-    "width": 800
+    "width": 1920,
+    "height": 1080,
+    "title": "Alien space station",
+    "fullscreen": true
   }
 }

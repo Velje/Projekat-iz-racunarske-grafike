@@ -33,10 +33,10 @@ void Camera::move_camera(Movement direction, float delta_time) {
         Position += Right * velocity;
     }
     if (direction == UP) {
-        Position += Up * velocity;
+        Position += WorldUp * velocity;
     }
     if (direction == DOWN) {
-        Position -= Up * velocity;
+        Position -= WorldUp * velocity;
     }
 }
 

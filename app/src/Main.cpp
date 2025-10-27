@@ -1,8 +1,7 @@
 #include <engine/core/Engine.hpp>
+#include <MainApp.hpp>
 
-/**
- * Start here...
- */
-int main(int argc, char** argv) {
-    return 0;
+int main(int argc, char **argv) {
+    spdlog::info("Running MainApp");
+    return std::make_unique<app::MainApp>()->run(argc, argv);
 }

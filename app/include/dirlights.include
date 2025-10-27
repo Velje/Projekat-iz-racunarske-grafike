@@ -1,0 +1,11 @@
+for (size_t i = 0; i < NR_DIR_LIGHTS; i++) {
+    auto flipX = i % 2 ? 1.0f : -1.0f;
+    if (i < 2) {
+        m_initial_dirlight_directions.emplace_back(flipX * 1.0f, -1.0f, 1.0f);
+        update_directional(DirectionalLight(Light(glm::vec3(1.0f), true), m_initial_dirlight_directions[i]), i);
+    } else {
+        m_initial_dirlight_directions.emplace_back(flipX * 1.0f, -1.0f, -1.0f);
+        update_directional(DirectionalLight(Light(glm::vec3(1.0f), true), m_initial_dirlight_directions[i]),
+                           i);
+    }
+}

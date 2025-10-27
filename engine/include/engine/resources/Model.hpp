@@ -26,6 +26,15 @@ public:
     void draw(const Shader *shader);
 
     /**
+    * @brief Use for instanced drawing.
+    * @param shader Adequate shader prepared for 5 6 7 8.
+    * @param count Number of instances.
+    */
+    void draw_instances(const Shader *shader, const size_t count);
+
+    void prepare_instancing_data(std::vector<glm::mat4> &model_matrices);
+
+    /**
     * @brief Destroys the model in the OpenGL context.
     */
     void destroy();
@@ -81,6 +90,7 @@ private:
                               , m_path(std::move(path))
                               , m_name(std::move(name)) {
     }
+
 };
 } // namespace engine
 

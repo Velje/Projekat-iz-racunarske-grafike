@@ -1,0 +1,15 @@
+g_key_controls = {
+    engine::platform::KeyId::KEY_P,
+    engine::platform::KeyId::KEY_I,
+    engine::platform::KeyId::KEY_O,
+    engine::platform::KeyId::KEY_N,
+    engine::platform::KeyId::KEY_F2,
+    engine::platform::KeyId::KEY_ENTER,
+    engine::platform::KeyId::KEY_SPACE,
+    engine::platform::KeyId::KEY_ESCAPE,
+    engine::platform::KeyId::KEY_LEFT_SHIFT,
+};
+
+for (auto &pair: g_key_id_to_camera_movement) {
+    g_key_controls.emplace(pair.first);
+}
