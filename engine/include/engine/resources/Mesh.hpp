@@ -52,13 +52,16 @@ public:
     Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices,
          std::vector<Texture *> textures);
 
-    void draw_instances(const Shader *shader, std::vector<glm::mat4> &model_matrices);
+    void prepare_model_data(std::vector<glm::mat4> &model_matrices);
+
+    void draw_instances(const Shader *shader, const size_t count);
 
 private:
     uint32_t m_vao{0};
     uint32_t m_num_indices{0};
     std::vector<Texture *> m_textures;
     uint32_t m_instance_vbo{0};
+
 };
 } // namespace engine
 

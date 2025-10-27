@@ -70,14 +70,6 @@ std::string_view LightController::name() const {
 }
 
 void LightController::update_lights() {
-    Shader *lightShader = m_main_controller->m_resources_controller
-                                           ->shader("lightPass");
-    lightShader->use();
-    lightShader->set_vec3("viewPos", m_main_controller->m_graphics_controller
-                                                      ->camera()
-                                                      ->Position);
-    lightShader->set_float("exposure", m_light_attributes.exposure);
-    lightShader->set_float("gamma", m_light_attributes.gamma);
     Shader::update_lights(m_ubo_lights);
 }
 

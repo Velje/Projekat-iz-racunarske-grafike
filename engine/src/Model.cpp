@@ -17,10 +17,16 @@ void Model::destroy() {
     }
 }
 
-void Model::draw_instances(const Shader *shader, std::vector<glm::mat4> &model_matrices) {
+void Model::prepare_instancing_data(std::vector<glm::mat4> &model_matrices) {
+    for (auto &mesh: m_meshes) {
+        mesh.prepare_model_data(model_matrices);
+    }
+}
+
+void Model::draw_instances(const Shader *shader, const size_t count) {
     shader->use();
     for (auto &mesh: m_meshes) {
-        mesh.draw_instances(shader, model_matrices);
+        mesh.draw_instances(shader, count);
     }
 }
 

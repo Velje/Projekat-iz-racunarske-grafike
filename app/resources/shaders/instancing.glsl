@@ -19,9 +19,12 @@ layout (std140, binding = 0) uniform Matrices {
 };
 
 uniform mat3 normalModelMatrix;
+uniform mat4 transformedModel;
 
 void main() {
-    vs_out.FragPos = vec3(instanceMatrix * vec4(aPos, 1.0));
+    mat4 transformedInstance = transformedModel;
+    transformedInstance[3] += instanceMatrix[3];
+    vs_out.FragPos = vec3(transformedInstance * vec4(aPos, 1.0));
     vec3 T = normalize(normalModelMatrix * aTangent);
     vec3 B = normalize(normalModelMatrix * aBitangent);
     vec3 N = normalize(normalModelMatrix * aNormal);

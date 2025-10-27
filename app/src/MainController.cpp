@@ -4,9 +4,10 @@ namespace app {
 
 static std::unordered_map<engine::platform::KeyId, engine::graphics::Camera::Movement> g_key_id_to_camera_movement;
 static std::unordered_set<engine::platform::KeyId> g_key_controls;
-static std::array<glm::mat4, NR_UFO2_MODELS> g_ufo_2_matrices;
+static std::vector<glm::mat4> g_ufo_2_matrices(NR_UFO2_MODELS);
 static std::vector<glm::mat4> g_ubo_matrices(NR_UBO_MATRICES);
 static glm::mat4 g_ufo_matrix;
+static glm::mat4 g_translation_matrix(1.0f);
 
 static bool g_toggle_ufo_normals = false, g_spot_on = true, g_point_on = true, g_entered_ufo = false;
 static float t = 0.0;
@@ -47,6 +48,8 @@ void MainController::initialize() {
         model = glm::scale(model, glm::vec3(1.0f));
         g_ufo_2_matrices[i] = model;
     }
+    Model *lowpolyUFO = m_resources_controller->model("Low_poly_ufo_OBJ");
+    lowpolyUFO->prepare_instancing_data(g_ufo_2_matrices);
     auto camera = m_graphics_controller->camera();
     camera->Position = glm::vec3(0.0, 157.0f, 0.0f);
 }
@@ -133,24 +136,7 @@ void MainController::poll_events() {
         actionEnd = m_platform_controller->get_glfw_time();
         camera->Position = glm::vec3(0.0f, 157.0f, 0.0f);
         g_ufo_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 140.0f, 0.0f));
-        float radius = 500.0f;
-        size_t positionsPerCircle = 30;
-        float yStep = 30.0f;
-        for (size_t i = 0; i < NR_UFO2_MODELS; i++) {
-            size_t circleIndex = i / positionsPerCircle;
-            size_t positionInCircle = i % positionsPerCircle;
-
-            float angle = (positionInCircle * 2.0f * M_PI) / positionsPerCircle;
-
-            float x = cos(angle) * radius;
-            float z = sin(angle) * radius;
-
-            float y = -30.0f + (circleIndex * yStep);
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, glm::vec3(x, y, z));
-            model = glm::scale(model, glm::vec3(1.0f));
-            g_ufo_2_matrices[i] = model;
-        }
+        g_translation_matrix = glm::mat4(1.0f);
         eventEnd = m_platform_controller->get_glfw_time();
         m_event_controller->insta_log(
                 Action(Actions::PRESS, actionEnd - actionStart, EventA::KEY, eventEnd - eventStart,
@@ -199,9 +185,7 @@ void MainController::update_camera() {
                 camera->Position =
                         glm::vec3(g_ufo_matrix[3]) - 1000.0f * camera->Front;
                 update_model_position(g_ufo_matrix, pair.second);
-                for (size_t i = 0; i < NR_UFO2_MODELS; i++) {
-                    update_model_position(g_ufo_2_matrices[i], pair.second);
-                }
+                update_model_position(g_translation_matrix, pair.second);
                 camera->Position =
                         glm::vec3(g_ufo_matrix[3]) - 1000.0f * camera->Front;
                 eventEnd = m_platform_controller->get_glfw_time();
@@ -283,7 +267,19 @@ void MainController::light_pass() {
                                                                               48.0f * sin(angle));
         }
     }
-    m_light_controller->update_lights();
+    Shader *lightShader = m_resources_controller
+            ->shader("lightPass");
+    lightShader->use();
+    lightShader->set_vec3("viewPos", m_graphics_controller
+            ->camera()
+            ->Position);
+    lightShader->set_float("exposure", m_light_controller->m_light_attributes
+                                                         .exposure);
+    lightShader->set_float("gamma", m_light_controller->m_light_attributes
+                                                      .gamma);
+    if (g_spot_on || g_point_on) {
+        m_light_controller->update_lights();
+    }
     OpenGL::activate_gbuffertextures(m_graphics_controller->m_g_texture_ids);
     OpenGL::render_screen(m_graphics_controller->m_screen_vao);
 }
@@ -335,14 +331,11 @@ void MainController::draw_ufo_2() {
     Shader *instancingShader = m_resources_controller->shader("instancing");
     instancingShader->use();
     float angle = 2.0f * t + 2.0f * M_PI / NR_SPOT_LIGHTS;
-    std::vector<glm::mat4> models(NR_UFO2_MODELS);
-    for (size_t i = 0; i < NR_UFO2_MODELS; i++) {
-        models[i] = g_ufo_2_matrices[i];
-        models[i] = glm::rotate(models[i], angle,
-                                glm::vec3(0.0f, 1.0f, 0.0f));
-    }
-    instancingShader->set_mat3("normalModelMatrix", glm::mat3(glm::transpose(glm::inverse(models[0]))));
-    lowpolyUFO->draw_instances(instancingShader, models);
+    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f));
+    instancingShader->set_mat4("transformedModel", g_translation_matrix * rotationMatrix);
+    instancingShader->set_mat3("normalModelMatrix",
+                               glm::mat3(glm::transpose(glm::inverse(rotationMatrix))));
+    lowpolyUFO->draw_instances(instancingShader, NR_UFO2_MODELS);
 }
 
 void MainController::draw_ufo_normals() {

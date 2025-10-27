@@ -82,7 +82,13 @@ void Mesh::destroy() {
     glDeleteVertexArrays(1, &m_vao);
 }
 
-void Mesh::draw_instances(const Shader *shader, std::vector<glm::mat4> &model_matrices) {
+void Mesh::prepare_model_data(std::vector<glm::mat4> &model_matrices) {
+    glBindBuffer(GL_ARRAY_BUFFER, m_instance_vbo);
+    glBufferData(GL_ARRAY_BUFFER, model_matrices.size() * sizeof(glm::mat4),
+                 model_matrices.data(), GL_STREAM_DRAW);
+}
+
+void Mesh::draw_instances(const Shader *shader, const size_t count) {
     std::unordered_map<std::string_view, uint32_t> counts;
     std::string uniform_name;
     uniform_name.reserve(32);
@@ -97,11 +103,8 @@ void Mesh::draw_instances(const Shader *shader, std::vector<glm::mat4> &model_ma
         uniform_name.clear();
     }
     glBindVertexArray(m_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, m_instance_vbo);
-    glBufferData(GL_ARRAY_BUFFER, model_matrices.size() * sizeof(glm::mat4),
-                 model_matrices.data(), GL_DYNAMIC_DRAW);
     glDrawElementsInstanced(GL_TRIANGLES,
-                            m_num_indices, GL_UNSIGNED_INT, 0, model_matrices.size());
+                            m_num_indices, GL_UNSIGNED_INT, 0, count);
     glBindVertexArray(0);
 }
 
